@@ -1,0 +1,4 @@
+model,n,exact_substring_n,exact_substring_pct,mean_gen_token_overlap_with_diff,median_gen_token_overlap_with_diff,mean_gen_tokens,corr_gen_len_vs_diff_nli_signed
+codellama-7b,1600,0,0.0,0.472,0.462,8.48,-0.042
+qwen2.5-coder-7b,1600,0,0.0,0.384,0.375,9.95,0.070
+deepseek-6.7b,1600,0,0.0,0.457,0.455,6.54,0.096

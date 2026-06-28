@@ -1,0 +1,359 @@
+% Anchor bibliography for the CMG/IST paper.
+%
+% Entries written from Claude Opus 4.7's recall of each paper's
+% approximate year and venue. Where I am uncertain I flag it with
+% `% VERIFY:` so a human can check Google Scholar / ACL Anthology /
+% IEEE Xplore before camera-ready. Do NOT trust the DOI or page
+% numbers here without verification.
+
+%% ------------------------------------------------------------------
+%% Commit message generation — systems and datasets
+%% ------------------------------------------------------------------
+
+@inproceedings{jung2021commitbert,
+  author = {Jung, Tae-Hwan},
+  title = {{CommitBERT}: Commit Message Generation Using Pre-Trained Programming Language Model},
+  booktitle = {Proceedings of the 1st Workshop on Natural Language Processing for Programming (NLP4Prog) at ACL-IJCNLP 2021},
+  year = {2021},
+  pages = {26--33},
+  publisher = {Association for Computational Linguistics},
+  % Verified 2026-04-20 after R4 reference-verification table:
+  %  NLP4Prog workshop co-located with ACL-IJCNLP 2021, ACL Anthology pages 26-33.
+}
+
+@article{wang2021corec,
+  author = {Wang, Haoye and Xia, Xin and Lo, David and He, Qiang and Wang, Xinyu and Grundy, John},
+  title = {Context-Aware Retrieval-Based Deep Commit Message Generation},
+  journal = {ACM Transactions on Software Engineering and Methodology},
+  volume = {30},
+  number = {4},
+  articleno = {56},
+  year = {2021},
+  publisher = {ACM},
+  doi = {10.1145/3464689},
+  % VERIFY: TOSEM 30(4), Article 56; confirmed DOI 10.1145/3464689
+}
+
+@inproceedings{dong2022fira,
+  author = {Dong, Jinhao and Lou, Yiling and Zhu, Qihao and Sun, Zeyu and Li, Zhilin and Zhang, Wenjie and Hao, Dan},
+  title = {{FIRA}: Fine-Grained Graph-Based Code Change Representation for Automated Commit Message Generation},
+  booktitle = {Proceedings of the 44th International Conference on Software Engineering (ICSE)},
+  year = {2022},
+  publisher = {IEEE/ACM},
+  pages = {970--981},
+  % VERIFY: exact page range
+}
+
+@inproceedings{tao2021mcmd,
+  author = {Tao, Wei and Wang, Yanlin and Shi, Ensheng and Du, Lun and Han, Shi and Zhang, Hongyu and Zhang, Dongmei and Zhang, Wenqiang},
+  title = {On the Evaluation of Commit Message Generation Models: An Experimental Study},
+  booktitle = {Proceedings of the 37th IEEE International Conference on Software Maintenance and Evolution (ICSME)},
+  year = {2021},
+  pages = {126--136},
+  publisher = {IEEE},
+  doi = {10.1109/ICSME52107.2021.00018},
+  % Verified 2026-04-20 after R4 reference-verification table:
+  %  ICSME 2021 pages 126-136; DOI 10.1109/ICSME52107.2021.00018.
+}
+
+@article{liu2020atom,
+  author = {Liu, Shangqing and Gao, Cuiyun and Chen, Sen and Nie, Lun Yiu and Liu, Yang},
+  title = {{ATOM}: Commit Message Generation Based on Abstract Syntax Tree and Hybrid Ranking},
+  journal = {IEEE Transactions on Software Engineering},
+  volume = {48},
+  number = {5},
+  pages = {1800--1817},
+  year = {2022},
+  publisher = {IEEE},
+  doi = {10.1109/TSE.2020.3038681},
+  % VERIFY: TSE 48(5), 2022 print; DOI 10.1109/TSE.2020.3038681
+  % NB: bibkey retains "2020" suffix from online-first date; printed 2022.
+}
+
+@inproceedings{jiang2017nmtcommit,
+  author = {Jiang, Siyuan and Armaly, Ameer and McMillan, Collin},
+  title = {Automatically Generating Commit Messages from Diffs Using Neural Machine Translation},
+  booktitle = {Proceedings of the 32nd IEEE/ACM International Conference on Automated Software Engineering (ASE)},
+  year = {2017},
+  pages = {135--146},
+  % VERIFY: pages
+}
+
+%% ------------------------------------------------------------------
+%% Machine translation / NLG metric critique
+%% ------------------------------------------------------------------
+
+@inproceedings{mathur2020tangled,
+  author = {Mathur, Nitika and Baldwin, Timothy and Cohn, Trevor},
+  title = {Tangled Up in {BLEU}: Reevaluating the Evaluation of Automatic Machine Translation Evaluation Metrics},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year = {2020},
+  % VERIFY: pages
+}
+
+@inproceedings{kaster2021global,
+  author = {Kaster, Marvin and Zhao, Wei and Eger, Steffen},
+  title = {Global Explainability of {BERT}-Based Evaluation Metrics by Disentangling along Linguistic Factors},
+  booktitle = {Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+  year = {2021},
+  pages = {8912--8925},
+}
+
+@inproceedings{post2018sacrebleu,
+  author = {Post, Matt},
+  title = {A Call for Clarity in Reporting {BLEU} Scores},
+  booktitle = {Proceedings of the Third Conference on Machine Translation: Research Papers (WMT)},
+  year = {2018},
+  pages = {186--191},
+}
+
+@article{reiter2018structured,
+  author = {Reiter, Ehud},
+  title = {A Structured Review of the Validity of {BLEU}},
+  journal = {Computational Linguistics},
+  volume = {44},
+  number = {3},
+  pages = {393--401},
+  year = {2018},
+}
+
+@inproceedings{sellam2020bleurt,
+  author = {Sellam, Thibault and Das, Dipanjan and Parikh, Ankur P.},
+  title = {{BLEURT}: Learning Robust Metrics for Text Generation},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year = {2020},
+  pages = {7881--7892},
+}
+
+@inproceedings{zhang2020bertscore,
+  author = {Zhang, Tianyi and Kishore, Varsha and Wu, Felix and Weinberger, Kilian Q. and Artzi, Yoav},
+  title = {{BERTScore}: Evaluating Text Generation with {BERT}},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year = {2020},
+}
+
+@inproceedings{papineni2002bleu,
+  author = {Papineni, Kishore and Roukos, Salim and Ward, Todd and Zhu, Wei-Jing},
+  title = {{BLEU}: a Method for Automatic Evaluation of Machine Translation},
+  booktitle = {Proceedings of the 40th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year = {2002},
+  pages = {311--318},
+}
+
+@inproceedings{lin2004rouge,
+  author = {Lin, Chin-Yew},
+  title = {{ROUGE}: A Package for Automatic Evaluation of Summaries},
+  booktitle = {Text Summarization Branches Out},
+  year = {2004},
+  pages = {74--81},
+}
+
+@inproceedings{popovic2015chrf,
+  author = {Popovi{\'c}, Maja},
+  title = {{chrF}: Character n-gram F-score for Automatic {MT} Evaluation},
+  booktitle = {Proceedings of the Tenth Workshop on Statistical Machine Translation (WMT)},
+  year = {2015},
+  pages = {392--395},
+}
+
+@inproceedings{popovic2017chrfpp,
+  author = {Popovi{\'c}, Maja},
+  title = {{chrF++}: words helping character n-grams},
+  booktitle = {Proceedings of the Second Conference on Machine Translation (WMT)},
+  year = {2017},
+  pages = {612--618},
+}
+
+@inproceedings{banerjee2005meteor,
+  author = {Banerjee, Satanjeev and Lavie, Alon},
+  title = {{METEOR}: An Automatic Metric for {MT} Evaluation with Improved Correlation with Human Judgments},
+  booktitle = {Proceedings of the ACL Workshop on Intrinsic and Extrinsic Evaluation Measures for Machine Translation and/or Summarization},
+  year = {2005},
+  pages = {65--72},
+}
+
+%% ------------------------------------------------------------------
+%% Natural language inference as faithfulness probe
+%% ------------------------------------------------------------------
+
+@inproceedings{maccartney2008modeling,
+  author = {MacCartney, Bill and Manning, Christopher D.},
+  title = {Modeling Semantic Containment and Exclusion in Natural Language Inference},
+  booktitle = {Proceedings of the 22nd International Conference on Computational Linguistics (COLING)},
+  year = {2008},
+  pages = {521--528},
+}
+
+@inproceedings{falke2019ranking,
+  author = {Falke, Tobias and Ribeiro, Leonardo F. R. and Utama, Prasetya Ajie and Dagan, Ido and Gurevych, Iryna},
+  title = {Ranking Generated Summaries by Correctness: An Interesting but Challenging Application for Natural Language Inference},
+  booktitle = {Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year = {2019},
+  pages = {2214--2220},
+}
+
+@inproceedings{williams2018multinli,
+  author = {Williams, Adina and Nangia, Nikita and Bowman, Samuel R.},
+  title = {A Broad-Coverage Challenge Corpus for Sentence Understanding through Inference},
+  booktitle = {Proceedings of NAACL-HLT},
+  year = {2018},
+  pages = {1112--1122},
+}
+
+@inproceedings{lewis2020bart,
+  author = {Lewis, Mike and Liu, Yinhan and Goyal, Naman and Ghazvininejad, Marjan and Mohamed, Abdelrahman and Levy, Omer and Stoyanov, Veselin and Zettlemoyer, Luke},
+  title = {{BART}: Denoising Sequence-to-Sequence Pre-training for Natural Language Generation, Translation, and Comprehension},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year = {2020},
+  pages = {7871--7880},
+}
+
+@inproceedings{honovich2022true,
+  author = {Honovich, Or and Aharoni, Roee and Herzig, Jonathan and Taitelbaum, Hagai and Kukliansy, Doron and Cohen, Vered and Scialom, Thomas and Szpektor, Idan and Hassidim, Avinatan and Matias, Yossi},
+  title = {{TRUE}: Re-evaluating Factual Consistency Evaluation},
+  booktitle = {Proceedings of NAACL-HLT},
+  year = {2022},
+  pages = {3905--3920},
+  % VERIFY: NAACL 2022 main; page range verified against ACL Anthology
+}
+
+@inproceedings{he2023debertav3,
+  author = {He, Pengcheng and Gao, Jianfeng and Chen, Weizhu},
+  title = {{DeBERTaV3}: Improving {DeBERTa} using {ELECTRA}-Style Pre-Training with Gradient-Disentangled Embedding Sharing},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year = {2023},
+  % VERIFY: ICLR 2023; confirm bibkey variants in typesetter style file
+}
+
+%% ------------------------------------------------------------------
+%% CMG — recent empirical studies (R3 additions)
+%% Entries below have NOT been verified against the published venue
+%% records; they are Claude's best recall of the paper identity. Author
+%% order and exact titles MUST be verified at camera-ready time.
+%% ------------------------------------------------------------------
+
+@inproceedings{tian2022goodmsg,
+  author = {Tian, Yingchen and Zhang, Yuxia and Stol, Klaas-Jan and Jiang, Lin and Liu, Hui},
+  title = {What Makes a Good Commit Message?},
+  booktitle = {Proceedings of the 44th International Conference on Software Engineering (ICSE)},
+  year = {2022},
+  publisher = {ACM},
+  % VERIFY: ICSE 2022 paper; author list corrected per ICSE 2022 record
+  % (earlier revisions of this bib used a hallucinated Li-Jiang-Xia
+  %  attribution — removed 2026-04-20 after R1-new verification).
+}
+
+@inproceedings{dong2022bleuornot,
+  author = {Dong, Chunhong and Li, Yue and Tao, Wei and Wang, Yanlin and Yang, Ting and Xu, Yanyan},
+  title = {Evaluating Commit Message Generation: To {BLEU} Or Not To {BLEU}?},
+  booktitle = {Proceedings of the 44th International Conference on Software Engineering (ICSE-NIER)},
+  year = {2022},
+  publisher = {ACM/IEEE},
+  % VERIFY: ICSE 2022 NIER (New Ideas and Emerging Results) track;
+  % author list reconstructed from recall, confirm at camera-ready
+}
+
+@article{zhou2024cmgreview,
+  author = {Zhou, Pengyu and Sun, Xiaobing and Li, Bin and Liu, Cuiyun and Xu, Zexian and Lin, Bixin and Lo, David},
+  title = {Automatic Commit Message Generation: A Critical Review and Directions for Future Work},
+  journal = {IEEE Transactions on Software Engineering},
+  year = {2024},
+  publisher = {IEEE},
+  % VERIFY: TSE 2024 CMG critical review; exact author list and
+  % volume/issue/pages need confirmation at camera-ready
+}
+
+%% ------------------------------------------------------------------
+%% Tools and frameworks (optional cites in implementation section)
+%% ------------------------------------------------------------------
+
+@inproceedings{wolf2020transformers,
+  author = {Wolf, Thomas and Debut, Lysandre and Sanh, Victor and Chaumond, Julien and Delangue, Clement and Moi, Anthony and Cistac, Pierric and Rault, Tim and Louf, R{\'e}mi and Funtowicz, Morgan and Davison, Joe and Shleifer, Sam and von Platen, Patrick and Ma, Clara and Jernite, Yacine and Plu, Julien and Xu, Canwen and Le Scao, Teven and Gugger, Sylvain and Drame, Mariama and Lhoest, Quentin and Rush, Alexander},
+  title = {Transformers: State-of-the-Art Natural Language Processing},
+  booktitle = {Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing: System Demonstrations (EMNLP)},
+  year = {2020},
+  pages = {38--45},
+}
+
+%% ------------------------------------------------------------------
+%% Code LLMs used in the real-generation study (v2 §§5–7)
+%%
+%% NOTE (R4): the three code LLMs we use (CodeLlama-7B-Instruct,
+%% Qwen2.5-Coder-7B-Instruct, DeepSeek-Coder-6.7B-Instruct) were
+%% released as arXiv technical reports without archival conference/
+%% journal publication. To avoid citing non-archival preprints, we do
+%% *not* place @misc entries for them here; the §5 Experimental Setup
+%% paragraph identifies each by its HuggingFace model identifier
+%% (checkpoint, revision hash) and our released artefact fixes the
+%% exact checkpoint. A future revision may add arXiv citations if the
+%% target venue style accepts them.
+%% ------------------------------------------------------------------
+
+%% ------------------------------------------------------------------
+%% CMG — recent empirical studies cited in §2 (R4 additions)
+%% These entries reflect Claude's best recall of real publications;
+%% author order, exact titles, pages, and DOIs MUST be verified
+%% against ACL Anthology / IEEE Xplore / ACM DL at camera-ready.
+%% ------------------------------------------------------------------
+
+@inproceedings{shi2022race,
+  author = {Shi, Ensheng and Wang, Yanlin and Tao, Wei and Du, Lun and Zhang, Hongyu and Han, Shi and Zhang, Dongmei and Sun, Hongbin},
+  title = {{RACE}: Retrieval-Augmented Commit Message Generation},
+  booktitle = {Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
+  year = {2022},
+  pages = {5520--5530},
+  publisher = {Association for Computational Linguistics},
+  % Verified 2026-04-20 after R4 reference-verification table:
+  %  EMNLP 2022 main, ACL Anthology pages 5520-5530.
+}
+
+@inproceedings{dong2023revisiting,
+  author = {Dong, Jinhao and Lou, Yiling and Hao, Dan and Tan, Lin},
+  title = {Revisiting Learning-based Commit Message Generation},
+  booktitle = {Proceedings of the 45th International Conference on Software Engineering (ICSE)},
+  year = {2023},
+  pages = {794--805},
+  doi = {10.1109/ICSE48619.2023.00075},
+  publisher = {IEEE/ACM},
+  % VERIFY: ICSE 2023. Author list corrected 2026-04-20 after R5 flagged
+  %  that earlier bib revisions had copied the MCMD (tao2021mcmd) author
+  %  list verbatim — a clear hallucination. Actual authors confirmed by
+  %  IEEE Xplore record.
+}
+
+@inproceedings{schall2024commitbench,
+  author = {Schall, Maximilian and Czinczoll, Tamara and {de Melo}, Gerard},
+  title = {{CommitBench}: A Benchmark for Commit Message Generation},
+  booktitle = {Proceedings of the IEEE International Conference on Software Analysis, Evolution and Reengineering (SANER)},
+  year = {2024},
+  pages = {728--739},
+  publisher = {IEEE},
+  % Verified 2026-04-20 after R4 reference-verification table:
+  %  SANER 2024, pages 728-739 (DBLP). Prefer this final version over
+  %  any earlier arXiv preprint in citation.
+}
+
+@article{li2024onlydiff,
+  author = {Li, Jiawei and Farag{\'o}, David and Petrov, Christian and Ahmed, Iftekhar},
+  title = {Only Diff Is Not Enough: Generating Commit Messages Leveraging Reasoning and Action of Large Language Model},
+  journal = {Proceedings of the ACM on Software Engineering (FSE)},
+  volume = {1},
+  number = {FSE},
+  articleno = {34},
+  pages = {745--766},
+  year = {2024},
+  doi = {10.1145/3643760},
+  % VERIFY: third-author slot corrected 2026-04-20 after R5 flagged an
+  %  earlier "Petke" attribution as incorrect; reviewer supplied
+  %  "Christian Petrov". Confirm final spelling and institutional
+  %  affiliation against the ACM DL record at camera-ready.
+}
+
+@inproceedings{eliseeva2023history,
+  author = {Eliseeva, Aleksandra and Sokolov, Yaroslav and Bogomolov, Egor and Golubev, Yaroslav and Dig, Danny and Bryksin, Timofey},
+  title = {From Commit Message Generation to History-Aware Commit Message Completion},
+  booktitle = {Proceedings of the 38th IEEE/ACM International Conference on Automated Software Engineering (ASE)},
+  year = {2023},
+  % VERIFY: ASE 2023 paper on context-aware / history-aware CMG;
+  % confirm exact title, author list, and pages
+}

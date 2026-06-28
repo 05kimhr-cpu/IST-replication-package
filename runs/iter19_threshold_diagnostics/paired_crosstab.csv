@@ -1,0 +1,7 @@
+backbone,threshold,model,n,both_pass,gold_only,gen_only,both_fail,gen_minus_gold_pp
+BART-MNLI,0.56,codellama-7b,1600,163,138,432,867,18.4
+BART-MNLI,0.56,qwen2.5-coder-7b,1600,170,131,442,857,19.4
+BART-MNLI,0.56,deepseek-6.7b,1600,135,166,404,895,14.9
+DeBERTa-v3,0.56,codellama-7b,1600,237,180,486,697,19.1
+DeBERTa-v3,0.56,qwen2.5-coder-7b,1600,304,113,583,600,29.4
+DeBERTa-v3,0.56,deepseek-6.7b,1600,229,188,479,704,18.2

@@ -1,0 +1,80 @@
+{"diff_id": 84, "language": "cpp", "gold": "[ Type checker ] Request member layout for a member of a finalized type .", "generated": "\"Adds lazy variable storage synthesis for TypeCheckDecl\""}
+{"diff_id": 148, "language": "cpp", "gold": "Merge and generalize case 3 and case 6", "generated": "\"Refactored switch cases in test_one_input\""}
+{"diff_id": 170, "language": "cpp", "gold": "Moved API Breaking Changes section of the documentation above the programmer ' s FAQ .", "generated": "\"Update imgui.cpp with API breaking changes\""}
+{"diff_id": 227, "language": "cpp", "gold": "Allow cold change of active extruder ( )", "generated": "\"Fix tool change function in Marlin\""}
+{"diff_id": 624, "language": "cpp", "gold": "[ renderer ] Don ' t adjust 3d rectangles in bypass mode", "generated": "\"Refactored BaseRenderer stereo view handling\""}
+{"diff_id": 634, "language": "cpp", "gold": "lua : Add support to use app . activeFrame with a Frame object", "generated": "\"Update App_set_activeLayer and App_set_activeFrame\""}
+{"diff_id": 679, "language": "cpp", "gold": "Updated expiration in seconds for benchmark transfer command .", "generated": "\"Update main.cpp for benchmarking transfers\""}
+{"diff_id": 932, "language": "cpp", "gold": "Add option to disable 077 umask ( create new files with system default umask )", "generated": "\"Update script verification threads, pid file, and reindex options\""}
+{"diff_id": 997, "language": "cpp", "gold": "Make remote FS work with GDNative on Android", "generated": "\"Adds APK export functionality\""}
+{"diff_id": 1118, "language": "cpp", "gold": "! B ( CE - 10899 ) ( AISystem ) Sequence nodes : changed the way how nodes react on invalid sequence IDs to prevent consequential errors from preceding errors ( Approved by samuelk )", "generated": "\"Implemented AI sequence bookmarking and action handling\""}
+{"diff_id": 281, "language": "cs", "gold": "transmitthenet : Add daily show support for NEB . Resolves", "generated": "\"Refactored TransmitheNet indexer query\""}
+{"diff_id": 354, "language": "cs", "gold": "Adding docker files , modifying scripts and code to handle ubuntu 16 . 04", "generated": "\"Adds new RuntimeFallbacks for Ubuntu 16.04\""}
+{"diff_id": 427, "language": "cs", "gold": "Added more conditions to sure it act as expected .", "generated": "\"Adds multithreading conditions and checks\""}
+{"diff_id": 461, "language": "cs", "gold": "Add support for netcoreapp5 . 0 to micro benchmarks ( dotnet / extensions )", "generated": "\"Update DefaultCoreConfig for different target frameworks\""}
+{"diff_id": 742, "language": "cs", "gold": "Fixed touch capability on Windows 8 when multiple input devices are present", "generated": "\"Update TouchPanelCapabilities for Windows and Windows Store\""}
+{"diff_id": 884, "language": "cs", "gold": "Add GetErrorHtml and expand GetErrorStatus to check ModelError for ResponseStatus", "generated": "\"Implemented error handling and authentication in ViewPageBase\""}
+{"diff_id": 1012, "language": "cs", "gold": "Re - add members to be removed to avoid API break", "generated": "\"Add missing obsolete annotations and imports\""}
+{"diff_id": 1072, "language": "cs", "gold": "Retain handles on KVO callback so the GC doesn ' t take it back", "generated": "\"Implemented KVOObservableForProperty using ReactiveUI\""}
+{"diff_id": 1332, "language": "cs", "gold": "Adding a [ HttpGet ] attribute to enable the Delete album from the store functionality .", "generated": "\"Adds Delete method to StoreManagerController\""}
+{"diff_id": 1971, "language": "cs", "gold": "Encryption core is approximately 30 % faster than previous version .", "generated": "\"Update DESCore class to use int arrays\""}
+{"diff_id": 7, "language": "go", "gold": "Printing correction count for each provider as we go.", "generated": "\"Update main.go for DNS Provider output formatting\""}
+{"diff_id": 10, "language": "go", "gold": "Redundant use of multiple fmt.Println commands\nChanged multiple fmt.Println(\"\") commands to one using backticks", "generated": "\"Updated usage instructions and added flag defaults\""}
+{"diff_id": 65, "language": "go", "gold": "Documentation: Clarify the when to implement certain interfaces", "generated": "\"Implemented interfaces for Registrar, DNSServiceProvider and DomainCreator\""}
+{"diff_id": 112, "language": "go", "gold": "Fix for incomplete results from Azure DNS in fetchRecordSets", "generated": "\"Improve azureDNSProvider.go: Refactor record fetching\""}
+{"diff_id": 115, "language": "go", "gold": "fix: only run SRV null target test when supported", "generated": "\"Update SRV tests to include null target\""}
+{"diff_id": 131, "language": "go", "gold": "HETZNER: fix retry of POST/PUT requests -- rebuild request body\nPreviously for any retry the request body was already consumed and\nthe server received an empty body.", "generated": "\"Add request rate limiting to Hetzner API provider\""}
+{"diff_id": 151, "language": "go", "gold": "Show actual URL to use instead of just \"sandbox\"\n* Show actual URL to use instead of just \"sandbox\"\nInstead of stating \"sandbox\", sometimes incorrectly if sandbox is false, just output the actual URL that will be used.\n* Replace Println with Printf", "generated": "\"Update DNSMADEEASY provider print statement\""}
+{"diff_id": 170, "language": "go", "gold": "Emit warning in case of label having multiple TTLs\nAn RRSet (=label) consisting of multiple records with different TTLs is\nsomething not supported by most providers, and should be avoided.\nFurthermore it is deprecated in rfc2181#section-5.2\nEmit a warning for now during validation, eventually turning it into a full-blown error.\nFixes", "generated": "\"Refactored label TTL collection in validate.go\""}
+{"diff_id": 221, "language": "go", "gold": "VULTR: Adopt diff2 in compatibility mode and fix handling of some integrations tests", "generated": "\"Add idna import and convert hostnames to punycode\""}
+{"diff_id": 234, "language": "go", "gold": "HOSTINGDE: Fix dnssec error resulting from non-go-conformant comparison of three values", "generated": "\"Fixes AutoDNSSec logic in hostingdeProvider\""}
+{"diff_id": 44, "language": "java", "gold": "Add a few todos for implementing monitor lookup ownership on native method frames", "generated": "\"Implemented monitor enter and exit logic\""}
+{"diff_id": 159, "language": "java", "gold": "sulong : resolveRenamedSymbols should print ExternalLibrary on failure", "generated": "\"Fix symbol resolution in LLVM parser\""}
+{"diff_id": 253, "language": "java", "gold": "[ hotfix ] Remove unused method in TaskExecutorProcessUtils", "generated": "\"Adds memory configuration calculations to TaskExecutorProcessUtils.java\""}
+{"diff_id": 269, "language": "java", "gold": "Re - use local variable in replacement of unnecessary indirections", "generated": "\"Update nullability of drmInitData in MediaCodecVideoRenderer.java\""}
+{"diff_id": 407, "language": "java", "gold": "1 . Update javadoc on subscribe ( ) blocking if observables are running on the same thread .", "generated": "\"Refactored concat operation for unsubscription\""}
+{"diff_id": 441, "language": "java", "gold": "[ hotfix ] Remove Exception from ZooKeeperUtils # createLeaderRetrievalService", "generated": "\"Update ZooKeeperUtils.java: Add missing parameter\""}
+{"diff_id": 451, "language": "java", "gold": "Profiler : clean up handling of null values .", "generated": "\"Improved null check in Profiler.java\""}
+{"diff_id": 492, "language": "java", "gold": "Index Update Settings API does not update settings in real time , closes .", "generated": "\"Update indexMetaDataChanged method\""}
+{"diff_id": 550, "language": "java", "gold": "Update depot version of ResourceUsageAnalyzer . java from the public Gradle source . This version includes :", "generated": "\"Add import statements for new classes and static fields\""}
+{"diff_id": 731, "language": "java", "gold": "Refactory of method name to match convention used elsewhere", "generated": "\"Update HystrixCommandProperties: Add metricsRollingPercentileWindowInMilliseconds property\""}
+{"diff_id": 77, "language": "js", "gold": "Revert \" failing test ; $ pull from array obj literals \"", "generated": "\"Implemented pull functionality for mixed array\""}
+{"diff_id": 121, "language": "js", "gold": "Open to correct line on Webstorm , IntelliJ and AppCode", "generated": "\"Refactored line number handling in launchEditor.js\""}
+{"diff_id": 305, "language": "js", "gold": "Add creation validation configuration , e . g . in order to check whether the user is authorized to create the room type", "generated": "\"Adds permission checks to RoomTypeConfig\""}
+{"diff_id": 432, "language": "js", "gold": "Ensure there ' s at least two set for minChunks", "generated": "\"Update webpack config for better code splitting and optimization\""}
+{"diff_id": 502, "language": "js", "gold": "Fold on selection - dont expand in the demo . Otherwise it ' s hard to test nested folding", "generated": "\"Implemented folding logic in demo.js\""}
+{"diff_id": 613, "language": "js", "gold": "Expose original function being bound to route in router : bind event", "generated": "\"Implemented bindFunction in router\""}
+{"diff_id": 815, "language": "js", "gold": "Allow event functions to be defined as functions AND strings .", "generated": "\"Implemented emitEvent function in sortable mixin\""}
+{"diff_id": 871, "language": "js", "gold": "Added C + + 11 tokens to highlighting rules", "generated": "\"Update c_cpp_highlight_rules.js\""}
+{"diff_id": 951, "language": "js", "gold": "Cleanup wrapper resets and add assert for returning function ` object ` values .", "generated": "\"Implemented lodash mixin functionality in test.js\""}
+{"diff_id": 1923, "language": "js", "gold": "throw Error for errors , and warn in browser and shell", "generated": "\"Add Java code for error and warning messages\""}
+{"diff_id": 31, "language": "php", "gold": "ResponseBuilder : creates a valid response with feed's content", "generated": "\"Adds ResponseBuilder class with construct and createResponse methods\""}
+{"diff_id": 47, "language": "php", "gold": "set 'content:encoded' as an alias of 'description'. Fix", "generated": "\"Update Rss class rule set\""}
+{"diff_id": 138, "language": "php", "gold": "use Serializable interface\navoid \"Exception: Serialization of 'ReflectionParameter' is not allowed\"", "generated": "\"Add serialization methods to InjectionPoint class\""}
+{"diff_id": 204, "language": "php", "gold": "Ensure modified download offer is used when performing update", "generated": "\"Implemented upgrade package filter for WP_CLI commands\""}
+{"diff_id": 218, "language": "php", "gold": "Convert plugin command and subcommand help summaries (and other method DocBlock summaries) to use third-person singular verbs.", "generated": "\"Update plugin commands in WP_CLI\""}
+{"diff_id": 219, "language": "php", "gold": "Convert theme command and subcommand help summaries (and other method DocBlock summaries) to use third-person singular verbs.", "generated": "\"Update theme commands in WP_CLI\""}
+{"diff_id": 224, "language": "php", "gold": "Limit addition of URL property when item is a class\nSee", "generated": "\"Add condition to check if item is instance of stdClass\""}
+{"diff_id": 228, "language": "php", "gold": "Handle extension activation for WP error or on not found", "generated": "\"Improved upgrade command validation\""}
+{"diff_id": 233, "language": "php", "gold": "Display warning in theme list info if theme version is higher than expected", "generated": "\"Add theme version info and update checks to Theme_Command class\""}
+{"diff_id": 244, "language": "php", "gold": "Workaround to equalize folder naming conventions across Win/Mac/Linux for WPCLI Themes", "generated": "\"Fixes theme fetching issue on Windows\""}
+{"diff_id": 100, "language": "py", "gold": "Use IPython . external for pexpect import .", "generated": "\"Update imports and usage string in irunner.py\""}
+{"diff_id": 103, "language": "py", "gold": "Simpler code for Semaphore . acquire ( ) as a context manager .", "generated": "\"Implemented Tornado locks with context management\""}
+{"diff_id": 105, "language": "py", "gold": "Try harder to provoke the exception since the ia64 buildbot still", "generated": "\"Fixes IOError in test_resource.py\""}
+{"diff_id": 125, "language": "py", "gold": "populate_db : Add random names for large user batches .", "generated": "\"Adds extra users to the database\""}
+{"diff_id": 219, "language": "py", "gold": "Conditionally create the CustomHTTPSConnection class only if we have the required baseclasses .", "generated": "\"Add SSL verification for HTTPS urls\""}
+{"diff_id": 268, "language": "py", "gold": "Do not count unmatched videos for - - max - downloads ( Fixes )", "generated": "\"Refactored and improved file downloading process\""}
+{"diff_id": 286, "language": "py", "gold": "Script to create . app bundles . Largely untested .", "generated": "\"Add Python script to create Mac app bundle\""}
+{"diff_id": 372, "language": "py", "gold": "Test method test_grid_search_incorrect_param_grid has been renamed to test_grid_search_param_grid_includes_sequence_of_a_zero_length .", "generated": "\"Update test_grid_search: Change param_grid to include non-empty sequence\""}
+{"diff_id": 633, "language": "py", "gold": "Added directory checking for documentation builds , and corrected for Windows pathing", "generated": "\"Implemented error handling and added missing directories\""}
+{"diff_id": 647, "language": "py", "gold": "Added support for multiple SAJ solar inverters ( )", "generated": "\"Update SAJ sensor setup: Add inverter name option\""}
+{"diff_id": 9, "language": "rust", "gold": "Support self-signed values and improve fingerprint support in TLS module", "generated": "\"Implemented TLS signature validation and self-signed validation\""}
+{"diff_id": 23, "language": "rust", "gold": "Bring `Display` impl for `reactor::validator::Event` in line with convention", "generated": "\"Implemented Display for Event in validator.rs\""}
+{"diff_id": 24, "language": "rust", "gold": "NO-TICKET: update logging config to handle outputting spans", "generated": "\"Update config.rs: Add span information and dimmed date/time\""}
+{"diff_id": 38, "language": "rust", "gold": "Add a minimal testing implementation for a small_network reactor", "generated": "\"Adds module test, enum Event, struct Message, and impls for TestReactor\""}
+{"diff_id": 63, "language": "rust", "gold": "Implement single step of test execution.\nAdds a couple more basic structs that turned out to be needed while implementing the `crank` method.", "generated": "\"Adds ConsensusInstance trait and related structs\""}
+{"diff_id": 70, "language": "rust", "gold": "Make node creation functions return node id as well as a reference for convenience", "generated": "\"Refactored add_node and add_node_with_config methods\""}
+{"diff_id": 75, "language": "rust", "gold": "Store a `server_span` for the server background task", "generated": "\"Update tokio and tracing dependencies, add server span\""}
+{"diff_id": 102, "language": "rust", "gold": "Panic instead of using anyhow for duplicate IDs in test `Network`", "generated": "\"Implemented add_node_with_config and updated error handling\""}
+{"diff_id": 118, "language": "rust", "gold": "Provide a better description of \"Requests\" in `effects` docs.", "generated": "\"Update effect.rs: Refactor requests and add Responder field\""}
+{"diff_id": 127, "language": "rust", "gold": "Return an HTTP 500 error if metrics collection failed", "generated": "\"Update api_server.rs: Use Cow for error handling\""}

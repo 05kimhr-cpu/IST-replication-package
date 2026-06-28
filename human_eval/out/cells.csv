@@ -1,0 +1,9 @@
+cell,population,sampled
+gold|pass|intent,19,10
+gold|pass|plain,282,10
+gold|fail|intent,140,10
+gold|fail|plain,1159,10
+gen|pass|intent,160,10
+gen|pass|plain,1586,10
+gen|fail|intent,317,10
+gen|fail|plain,2737,10

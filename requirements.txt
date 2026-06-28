@@ -1,0 +1,25 @@
+# CMG/IST construct-validity paper — pinned dependencies
+# Versions reflect the environment used to generate the headline
+# numbers in the published artefact.  A reader aiming to replicate
+# §§3–8 can create a fresh venv and `pip install -r requirements.txt`;
+# the MCMD corpus must be downloaded separately (see README.md).
+
+# Reference-based metrics (§3–§4)
+sacrebleu==2.6.0
+rouge_score==0.1.2
+nltk==3.9.4
+bert-score==0.3.12
+
+# NLI probe (§4.4, §5–§7)
+transformers==4.57.6
+torch==2.10.0
+# NLI checkpoints are loaded by identifier; the code is version-pinned
+# via the `revision=` argument in `src/cmg_ist/nli.py`.
+
+# Numerical / plotting
+numpy==2.3.5
+matplotlib==3.10.8
+
+# The three 7B code LLMs used in §5–§7 are identified by HuggingFace
+# model ID in the Artefact Availability appendix of the manuscript
+# (Paper.md).  They are NOT installed as Python packages.

@@ -1,0 +1,437 @@
+retest_id,language,diff,message,rater_label,rater_reason,rater_notes
+R01,cs,"mmm a / Duplicati / Library / AutoUpdater / UpdaterManager . cs
+ppp b / Duplicati / Library / AutoUpdater / UpdaterManager . cs
+public static bool DownloadAndUnpackUpdate ( UpdateInfo version , Action < double > pr
+if ( INSTALLDIR = = null )
+return false ;
+
+ +
++ var updates = version . RemoteURLS . ToList ( ) ;
++
++ / / If alternate update URLs are specified ,
++ / / we look for packages there as well
++ if ( AutoUpdateSettings . UsesAlternateURLs )
++ {
++ var packagepath = new Library . Utility . Uri ( updates [ 0 ] ) . Path ;
++ var packagename = packagepath . Split ( ' / ' ) . Last ( ) ;
++
++ foreach ( var alt_url in AutoUpdateSettings . URLs . Reverse ( ) )
++ {
++ var alt_uri = new Library . Utility . Uri ( alt_url ) ;
++ var path_components = alt_uri . Path . Split ( ' / ' ) ;
++ var path = string . Join ( "" / "" , path_components . Take ( path_components . Count ( ) - 1 ) . Union ( new string [ ] { packagename } ) ) ;
++
++ var new_path = alt_uri . SetPath ( path ) ;
++ updates . Insert ( 0 , new_path . ToString ( ) ) ;
++ }
++ }
++
+using ( var tempfile = new Library . Utility . TempFile ( ) )
+{
+- foreach ( var url in version . RemoteURLS )
++ foreach ( var url in updates )
+{
+try
+{ 
+
+",Added check to allow storing update packages on a local server for enterprise - like setups .,neutral,external_context,"Alternate update URLs are shown, but local server / enterprise-like setup purpose is not directly proven by the diff."
+R02,rust,"mmm a / wallet-crypto/src/tx.rs
+ppp b / wallet-crypto/src/tx.rs 
+@@ -542,7 +542,7 @@ pub mod fee {
+type Result<T> = result::Result<T, Error>;
+pub trait Algorithm {
+- fn compute(&self, policy: SelectionPolicy, inputs: &Inputs, outputs: &Outputs, change_addr: &ExtendedAddr, fee_addr: &ExtendedAddr) -> Result<(Fee, Inputs)>;
++ fn compute(&self, policy: SelectionPolicy, inputs: &Inputs, outputs: &Outputs, change_addr: &ExtendedAddr, fee_addr: &ExtendedAddr) -> Result<(Fee, Inputs, Coin)>;
+}
+#[derive(Serialize, Deserialize, PartialEq, PartialOrd, Debug, Clone, Copy)]
+@@ -573,7 +573,7 @@ pub mod fee {
+, change_addr: &ExtendedAddr
+, fee_addr: &ExtendedAddr
+)
+- -> Result<(Fee, Inputs)>
++ -> Result<(Fee, Inputs, Coin)>
+{
+if inputs.is_empty() { return Err(Error::NoInputs); }
+if outputs.is_empty() { return Err(Error::NoOutputs); }
+@@ -625,7 +625,7 @@ pub mod fee {
+return Err(Error::NotEnoughInput);
+}
+- Ok((fee, selected_inputs))
++ Ok((fee, selected_inputs, (input_value - output_value - fee.to_coin()).unwrap()))
+}
+}
+",Add Coin to tx::Algorithm::compute result tuple.,supported,exact_core,"compute result tuple directly changes from (Fee, Inputs) to (Fee, Inputs, Coin) and return value includes Coin."
+R03,js,"mmm a / test / MySQLAdapter . test . js
+ppp b / test / MySQLAdapter . test . js
+
+ / / Test MySQLAdapter
+- var mysql = require ( ' . / adapters / MySQLAdapter . js ' ) ;
+- require ( ' . / crud . test . js ' ) ( mysql ) ;
+\ No newline at end of file
++ require ( ' . / crud . test . js ' ) ( require ( ' . / adapters / MySQLAdapter . js ' ) ) ;
+\ No newline at end of file 
+
+","""Update MySQLAdapter test cases""",neutral,too_abstract,Diff only inlines require call in MySQLAdapter test file; “Update test cases” is too broad.
+R04,java,"mmm a / src / com . oracle . truffle . espresso / src / com / oracle / truffle / espresso / substitutions / Target_java_lang_reflect_Array . java
+ppp b / src / com . oracle . truffle . espresso / src / com / oracle / truffle / espresso / substitutions / Target_java_lang_reflect_Array . java
+public static Object newArray ( @ Host ( Class . class ) StaticObject componentType , int
+throw meta . throwEx ( meta . NegativeArraySizeException ) ;
+}
+}
++ if ( dimensions . length = = 1 ) {
++ / / getArrayClass ( 0 ) is undefined .
++ return meta . getInterpreterToVM ( ) . newMultiArray ( component , dimensions ) ;
++ }
+return meta . getInterpreterToVM ( ) . newMultiArray ( component . getArrayClass ( dimensions . length - 1 ) , dimensions ) ;
+}
+
+
+",[ GR - 18478 ] j . l . reflect . Array . newMultiArray returns incorrect type with single dimension .,neutral,external_context,"Single-dimension handling is shown, but “returns incorrect type” is a bug-effect claim not directly proven by the diff."
+R05,php,"mmm a / Security.php
+ppp b / Security.php 
+@@ -13,6 +13,7 @@ namespace Symfony\Component\Security\Core;
+use Psr\Container\ContainerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
++use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+/**
+@@ -20,7 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
+*
+* @final
+*/
+-class Security
++class Security implements AuthorizationCheckerInterface
+{
+const ACCESS_DENIED_ERROR = '_security.403_error';
+const AUTHENTICATION_ERROR = '_security.last_error';
+","[Security] class Security implements AuthorizationCheckerInterface
+The class has the method of AuthorizationCheckerInterface already.",neutral,diff_insufficient,"implements AuthorizationCheckerInterface is shown, but existing interface methods are not fully visible in the diff."
+R06,js,"mmm a / v3 / src / sound / html5 / HTML5AudioSoundManager . js
+ppp b / v3 / src / sound / html5 / HTML5AudioSoundManager . js
+var HTML5AudioSoundManager = new Class ( {
+Extends : BaseSoundManager ,
+initialize : function HTML5AudioSoundManager ( game ) {
+this . onBlurPausedSounds = [ ] ;
++ this . _mute = false ;
+BaseSoundManager . call ( this , game ) ;
+} ,
+add : function ( key , config ) { 
+
+",Add instance variable _mute to HTML5AudioSoundManager class.,supported,exact_core,Diff directly adds this._mute = false to HTML5AudioSoundManager.
+R07,js,"mmm a / tasks / build . js
+ppp b / tasks / build . js
+var
+
+ / / config
+config = require ( ' . / config / user ' ) ,
+- runSequence = require ( ' run - sequence ' ) ,
+install = require ( ' . / config / project / install ' )
+;
+
+ module . exports = function ( callback ) {
+return ;
+}
+
+ - var tasks = [ ] ;
+-
+/ / check for right - to - left ( RTL ) language
+if ( config . rtl = = ' both ' ) {
+- tasks . push ( ' build - rtl ' ) ;
++ gulp . start ( ' build - rtl ' ) ;
+}
+if ( config . rtl = = = true | | config . rtl = = = ' Yes ' ) {
+gulp . start ( ' build - rtl ' ) ;
+return ;
+}
+
+ - tasks . push ( ' build - javascript ' ) ;
+- tasks . push ( ' build - css ' ) ;
+- tasks . push ( ' build - assets ' ) ;
++ gulp . start ( ' build - javascript ' ) ;
++ gulp . start ( ' build - css ' ) ;
++ gulp . start ( ' build - assets ' ) ;
++
+
+ - runSequence ( tasks , callback ) ;
+} ; 
+
+","Revert "" Fix callback return from build task """,neutral,external_context,"Diff changes runSequence/callback flow, but identifying it as a revert of a named prior commit needs commit history."
+R08,cpp,"mmm a / src / mongo / dbtests / jstests . cpp
+ppp b / src / mongo / dbtests / jstests . cpp
+namespace JSTests {
+}
+} ;
+
+ - class DBRefTest {
+- public :
+- DBRefTest ( ) {
+- _a = "" unittest . dbref . a "" ;
+- _b = "" unittest . dbref . b "" ;
+- reset ( ) ;
+- }
+- ~ DBRefTest ( ) {
+- / / reset ( ) ;
+- }
++ namespace RoundTripTests {
+
+ - void run ( ) {
++ / / Inherit from this class to test round tripping of JSON objects
++ class TestRoundTrip {
++ public :
++ virtual ~ TestRoundTrip ( ) { }
++ void run ( ) {
+
+ - client . insert ( _a , BSON ( "" a "" < < "" 17 "" ) ) ;
++ / / Insert in Javascript - > Find using DBDirectClient
+
+ - {
+- BSONObj fromA = client . findOne ( _a , BSONObj ( ) ) ;
+- verify ( fromA . valid ( ) ) ;
+- / / cout < < "" Froma : "" < < fromA < < endl ;
++ / / Drop the collection
++ client . dropCollection ( "" unittest . testroundtrip "" ) ;
++
++ / / Insert in Javascript
++ stringstream jsInsert ;
++ jsInsert < < "" db . testroundtrip . insert ( "" < < jsonIn ( ) < < "" ) "" ;
++ ASSERT_TRUE ( client . eval ( "" unittest "" , jsInsert . str ( ) ) ) ;
++
++ / / Find using DBDirectClient
++ BSONObj excludeIdProjection = BSON ( "" _id "" < < 0 ) ;
++ BSONObj directFind = client . findOne ( "" unittest . testroundtrip "" ,
++ "" "" ,
++ & excludeIdProjection ) ;
++ bsonEquals ( bson ( ) , directFi","""Add DBRef, DBPointer and Object tests""",neutral,diff_insufficient,"Round-trip test framework is shown, but DBRef, DBPointer, and Object tests are not all directly visible."
+R09,cpp,"mmm a / lib / Sema / PlaygroundTransform . cpp
+ppp b / lib / Sema / PlaygroundTransform . cpp
+class Instrumenter : InstrumenterBase {
+return S ;
+case StmtKind : : Brace :
+return transformBraceStmt ( cast < BraceStmt > ( S ) ) ;
++ case StmtKind : : Defer :
++ return transformDeferStmt ( cast < DeferStmt > ( S ) ) ;
+case StmtKind : : If :
+return transformIfStmt ( cast < IfStmt > ( S ) ) ;
+case StmtKind : : Guard :
+class Instrumenter : InstrumenterBase {
+}
+}
+
+ + DeferStmt * transformDeferStmt ( DeferStmt * DS ) {
++ if ( auto * FD = DS - > getTempDecl ( ) ) {
++ auto Implicit = FD - > isImplicit ( ) ;
++ FD - > setImplicit ( false ) ;
++ auto * D = transformDecl ( FD ) ;
++ D - > setImplicit ( Implicit ) ;
++ assert ( D = = FD ) ;
++ }
++ return DS ;
++ }
++
+/ / transform * ( ) return their input if it ' s unmodified ,
+/ / or a modified copy of their input otherwise .
+IfStmt * transformIfStmt ( IfStmt * IS ) { 
+
+",Refactor: Instrumenter class and transformDeferStmt method.,neutral,near_miss,"DeferStmt handling is added, but message frames it as a refactor of Instrumenter/transformDeferStmt."
+R10,js,"mmm a / pdf . js
+ppp b / pdf . js
+var CanvasGraphics = ( function ( ) {
+w : "" setLineWidth "" ,
+J : "" setLineCap "" ,
+j : "" setLineJoin "" ,
++ M : "" setMiterLimit "" ,
+d : "" setDash "" ,
+ri : "" setRenderingIntent "" ,
+i : "" setFlatness "" ,
+var CanvasGraphics = ( function ( ) {
+m : "" moveTo "" ,
+l : "" lineTo "" ,
+c : "" curveTo "" ,
++ v : "" curveTo2 "" ,
++ y : "" curveTo3 "" ,
+h : "" closePath "" ,
+re : "" rectangle "" ,
+S : "" stroke "" ,
++ s : "" closeStroke "" ,
+f : "" fill "" ,
+"" f * "" : "" eoFill "" ,
+B : "" fillStroke "" ,
++ "" B * "" : "" eoFillStroke "" ,
+b : "" closeFillStroke "" ,
++ "" b * "" : "" closeEOFillStroke "" ,
+n : "" endPath "" ,
+
+ / / Clipping
+var CanvasGraphics = ( function ( ) {
+/ / Text
+BT : "" beginText "" ,
+ET : "" endText "" ,
++ Tc : "" setCharSpacing "" ,
++ Tw : "" setWordSpacing "" ,
++ Tz : "" setHScale "" ,
+TL : "" setLeading "" ,
+Tf : "" setFont "" ,
++ Tr : "" setTextRenderingMode "" ,
++ Ts : "" setTextRise "" ,
+Td : "" moveText "" ,
++ TD : "" setLeadingMoveText "" ,
+Tm : "" setTextMatrix "" ,
+"" T * "" : "" nextLine "" ,
+Tj : "" showText "" ,
+TJ : "" showSpacedText "" ,
++ "" ' "" : "" nextLineShowText "" ,
++ ' "" ' : "" nextLineSetSpacingShowText "" ,
+
+ / / Type3 fonts
++ d0 : "" setCharWidth "" ,
++ d1 : "" setCharWidthAndBounds "" ,
+
+ / / Color
+CS : "" setStrokeColorS","""Refactor CanvasGraphics class to use modern JavaScript syntax and improve code readability""",contradicted,different_change,"Diff adds CanvasGraphics PDF operator mappings, not modern JavaScript syntax/readability refactor."
+R11,cpp,"mmm a / Code / CryEngine / CryAction / GameVolumes / GameVolumesManager . cpp
+ppp b / Code / CryEngine / CryAction / GameVolumes / GameVolumesManager . cpp
+void CGameVolumesManager : : ResolveEntityIdsFromGUIDs ( )
+for ( uint32 index = 0 ; index < count ; + + index )
+{
+const EntityId entityId = gEnv - > pEntitySystem - > FindEntityByGuid ( m_volumesData [ index ] . entityGUID ) ;
+- CRY_ASSERT ( entityId ! = INVALID_ENTITYID ) ;
++
++ / / This is a valid case for some volumes which are baked ( e . g . CLedgeObjectStatic ) and not spawned as entity .
++ if ( entityId = = INVALID_ENTITYID )
++ continue ;
++
+m_entityToIndexMap [ entityId ] = index ;
+}
+} 
+
+",Add comment and condition to handle invalid entity IDs in ResolveEntityIdsFromGUIDs(),supported,exact_core,Diff directly replaces assert with condition/comment handling INVALID_ENTITYID in ResolveEntityIdsFromGUIDs.
+R12,java,"new file mode 100644
+index 0000000000000 . . 0fbe3e36e4445
+mmm / dev / null
+ppp b / src / test / java / org / elasticsearch / watcher / WatcherF . java
+
+ + / *
++ * Copyright Elasticsearch B . V . and / or licensed to Elasticsearch B . V . under one
++ * or more contributor license agreements . Licensed under the Elastic License ;
++ * you may not use this file except in compliance with the Elastic License .
++ * /
++ package org . elasticsearch . watcher ;
++
++ import org . elasticsearch . bootstrap . ElasticsearchF ;
++ import org . elasticsearch . license . plugin . LicensePlugin ;
++
++ / * *
++ * Main class to easily run Watcher from a IDE .
++ * It sets all the options to run the Watcher plugin and access it from Sense , but doesn ' t run with Shield .
++ *
++ * During startup an error will be printed that the config directory can ' t be found , to fix this :
++ * 1 ) Add a config directly to the top level project directory
++ * 2 ) or set ` - Des . path . conf = ` to a location where there is a config directory on your machine .
++ * /
++ public class WatcherF {
++
++ public static void main ( String [ ] args ) {
++ System . setProperty ( "" es . http . cors . enabled "" , "" true "" ) ;
++ System . setProperty ( "" es . script . disable_dynamic "" , "" false "" ) ;
++ System . setProperty ( "" es . shield . enabled "" , "" false "" ) ;
++ System . setProperty ( ",test : Add a simple runner that allows to run Watcher from the IDE and work out of the box with Sense .,supported,exact_core,New WatcherF runner class is added and comments state it runs Watcher from IDE and works with Sense.
+R13,py,"mmm a / youtube_dl / extractor / viki . py
+ppp b / youtube_dl / extractor / viki . py
+class VikiBaseIE ( InfoExtractor ) :
+
+ _token = None
+
+ + _ERRORS = {
++ ' geo ' : ' Sorry , this content is not available in your region . ' ,
++ ' upcoming ' : ' Sorry , this content is not yet available . ' ,
++ # ' paywall ' : ' paywall ' ,
++ }
++
+def _prepare_call ( self , path , timestamp = None , post_data = None ) :
+path + = ' ? ' if ' ? ' not in path else ' & '
+if not timestamp :
+def _raise_error ( self , error ) :
+' % s returned error : % s ' % ( self . IE_NAME , error ) ,
+expected = True )
+
+ + def _check_errors ( self , data ) :
++ for reason , status in data . get ( ' blocking ' , { } ) . items ( ) :
++ if status and reason in self . _ERRORS :
++ raise ExtractorError ( ' % s said : % s ' % (
++ self . IE_NAME , self . _ERRORS [ reason ] ) , expected = True )
++
+def _real_initialize ( self ) :
+self . _login ( )
+
+ class VikiIE ( VikiBaseIE ) :
+' timestamp ' : 1321985454 ,
+' description ' : ' md5 : 44b1e46619df3a072294645c770cef36 ' ,
+' title ' : ' Love In Magic ' ,
++ ' age_limit ' : 13 ,
+} ,
+} ]
+
+ def _real_extract ( self , url ) :
+video = self . _call_api (
+' videos / % s . json ' % video_id , video_id , ' Downloading video JSON ' )
+
+ + self . _check_errors ( video )
++
+title = self . dict_selecti",[ viki ] detect errors and fix formats extraction,neutral,missing_key_detail,"Error detection is shown via _ERRORS/_check_errors, but formats extraction fix is not directly visible."
+R14,js,"mmm a / select2 . js
+ppp b / select2 . js
+
+ var selected = element . find ( "" : selected "" ) ;
+/ / a single select box always has a value , no need to null check ' selected '
+if ( $ . isFunction ( callback ) )
+- callback ( { id : selected . attr ( "" value "" ) , text : selected . text ( ) } ) ;
++ callback ( { id : selected . attr ( "" value "" ) , text : selected . text ( ) , element : selected } ) ;
+} ;
+}
+
+
+",pass element attr to initSelection for selects upon init,neutral,near_miss,Diff adds element: selected to callback object; “element attr” is not perfectly accurate.
+R15,cs,"mmm a / mcs / class / System / Test / System . Net . WebSockets / ClientWebSocketTest . cs
+ppp b / mcs / class / System / Test / System . Net . WebSockets / ClientWebSocketTest . cs
+namespace MonoTests . System . Net . WebSockets
+public class ClientWebSocketTest
+{
+const string EchoServerUrl = "" ws : / / corefx - net . cloudapp . net / WebSocket / EchoWebSocket . ashx "" ;
+- int Port = NetworkHelpers . FindFreePort ( ) ;
++
++ ClientWebSocket socket ;
++ MethodInfo headerSetMethod ;
++ int Port ;
++
++ [ SetUp ]
++ public void Setup ( )
++ {
++ socket = new ClientWebSocket ( ) ;
++ Port = NetworkHelpers . FindFreePort ( ) ;
++ }
++
+HttpListener _listener ;
+HttpListener listener {
+get {
+if ( _listener ! = null )
+return _listener ;
++
+var tmp = new HttpListener ( ) ;
+tmp . Prefixes . Add ( "" http : / / localhost : "" + Port + "" / "" ) ;
+tmp . Start ( ) ;
+return _listener = tmp ;
+}
+}
+- ClientWebSocket _socket ;
+- ClientWebSocket socket { get { return _socket ? ? ( _socket = new ClientWebSocket ( ) ) ; } }
+- MethodInfo headerSetMethod ;
+
+ [ TearDown ]
+public void Teardown ( )
+public void Teardown ( )
+_listener . Stop ( ) ;
+_listener = null ;
+}
+- if ( _socket ! = null ) {
+- if ( _socket . State = = WebSocketState . Open )
+- _socket . CloseAsync ( WebSocketCloseStatus . NormalClosure , str",[ System ] Update ClientWebSocket test to use Setup,supported,exact_core,ClientWebSocket test directly adds [SetUp] Setup method to initialize socket and Port.

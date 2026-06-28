@@ -1,0 +1,1987 @@
+﻿sample_id,language,diff,message,rater_label,rater_reason,rater_notes
+S004,cpp,"mmm a / lib / Sema / PlaygroundTransform . cpp
+ppp b / lib / Sema / PlaygroundTransform . cpp
+class Instrumenter : InstrumenterBase {
+return S ;
+case StmtKind : : Brace :
+return transformBraceStmt ( cast < BraceStmt > ( S ) ) ;
++ case StmtKind : : Defer :
++ return transformDeferStmt ( cast < DeferStmt > ( S ) ) ;
+case StmtKind : : If :
+return transformIfStmt ( cast < IfStmt > ( S ) ) ;
+case StmtKind : : Guard :
+class Instrumenter : InstrumenterBase {
+}
+}
+
+ + DeferStmt * transformDeferStmt ( DeferStmt * DS ) {
++ if ( auto * FD = DS - > getTempDecl ( ) ) {
++ auto Implicit = FD - > isImplicit ( ) ;
++ FD - > setImplicit ( false ) ;
++ auto * D = transformDecl ( FD ) ;
++ D - > setImplicit ( Implicit ) ;
++ assert ( D = = FD ) ;
++ }
++ return DS ;
++ }
++
+/ / transform * ( ) return their input if it ' s unmodified ,
+/ / or a modified copy of their input otherwise .
+IfStmt * transformIfStmt ( IfStmt * IS ) { 
+
+",Refactor: Instrumenter class and transformDeferStmt method.,neutral,near_miss,
+S007,php,"mmm a / tests/ProxyManagerTestAsset/ObjectTypeHintClass.php
+ppp b / tests/ProxyManagerTestAsset/ObjectTypeHintClass.php 
+@@ -33,7 +33,7 @@ class ObjectTypeHintClass
+*
+* @return object
+*/
+- public function iterableTypeHintMethod(object $parameter)
++ public function objectTypeHintMethod(object $parameter)
+{
+return $parameter;
+}
+",Test asset method name correction - method name was mismatching the purpose (using an `object` hint),supported,exact_core,
+S008,rust,"mmm a / wallet-crypto/src/tx.rs
+ppp b / wallet-crypto/src/tx.rs 
+@@ -542,7 +542,7 @@ pub mod fee {
+type Result<T> = result::Result<T, Error>;
+pub trait Algorithm {
+- fn compute(&self, policy: SelectionPolicy, inputs: &Inputs, outputs: &Outputs, change_addr: &ExtendedAddr, fee_addr: &ExtendedAddr) -> Result<(Fee, Inputs)>;
++ fn compute(&self, policy: SelectionPolicy, inputs: &Inputs, outputs: &Outputs, change_addr: &ExtendedAddr, fee_addr: &ExtendedAddr) -> Result<(Fee, Inputs, Coin)>;
+}
+#[derive(Serialize, Deserialize, PartialEq, PartialOrd, Debug, Clone, Copy)]
+@@ -573,7 +573,7 @@ pub mod fee {
+, change_addr: &ExtendedAddr
+, fee_addr: &ExtendedAddr
+)
+- -> Result<(Fee, Inputs)>
++ -> Result<(Fee, Inputs, Coin)>
+{
+if inputs.is_empty() { return Err(Error::NoInputs); }
+if outputs.is_empty() { return Err(Error::NoOutputs); }
+@@ -625,7 +625,7 @@ pub mod fee {
+return Err(Error::NotEnoughInput);
+}
+- Ok((fee, selected_inputs))
++ Ok((fee, selected_inputs, (input_value - output_value - fee.to_coin()).unwrap()))
+}
+}
+",Add Coin to tx::Algorithm::compute result tuple.,supported,exact_core,
+S009,cs,"mmm a / SparkleShare / Mac / SparkleShare / SparkleUI . cs
+ppp b / SparkleShare / Mac / SparkleShare / SparkleUI . cs
+public SparkleUI ( )
+} ) ;
+
+ } ;
++
++ SparkleShare . Controller . OnIdle + = delegate {
++
++ InvokeOnMainThread ( delegate {
++
++ foreach ( SparkleLog log in SparkleUI . OpenLogs )
++ log . UpdateEventLog ( ) ;
++
++ } ) ;
++
++ } ;
+
+ }
+
+
+",[ ui ] update [ log ] on local commits,neutral,external_context,
+S012,py,"mmm a / tornado / auth . py
+ppp b / tornado / auth . py
+
+
+Example usage for Google OpenID : :
+
+ - class GoogleHandler ( tornado . web . RequestHandler , tornado . auth . GoogleMixin ) :
++ class GoogleLoginHandler ( tornado . web . RequestHandler ,
++ tornado . auth . GoogleMixin ) :
+@ tornado . web . asynchronous
++ @ tornado . gen . coroutine
+def get ( self ) :
+if self . get_argument ( "" openid . mode "" , None ) :
+- self . get_authenticated_user ( self . async_callback ( self . _on_auth ) )
+- return
+- self . authenticate_redirect ( )
+-
+- def _on_auth ( self , user ) :
+- if not user :
+- raise tornado . web . HTTPError ( 500 , "" Google auth failed "" )
+- # Save the user with , e . g . , set_secure_cookie ( )
++ user = yield self . get_authenticated_user ( )
++ # Save the user with e . g . set_secure_cookie ( )
++ else :
++ self . authenticate_redirect ( )
+"" "" ""
+
+ from __future__ import absolute_import , division , print_function , with_statement
+class TwitterMixin ( OAuthMixin ) :
+class TwitterLoginHandler ( tornado . web . RequestHandler ,
+tornado . auth . TwitterMixin ) :
+@ tornado . web . asynchronous
++ @ tornado . gen . coroutine
+def get ( self ) :
+if self . get_argument ( "" oauth_token "" , None ) :
+- self . get_authenticated_user ( self . async_callback ( self . _on_auth ) )
+- return
+- self . authorize_",Add coroutine decorator and yield keyword to tornado auth handlers for asynchronous handling.,supported,exact_core,
+S013,rust,"mmm a / node/src/protocol.rs
+ppp b / node/src/protocol.rs 
+use std::fmt::{self, Display, Formatter};
+use derive_more::From;
++use fmt::Debug;
+use hex_fmt::HexFmt;
+use serde::{Deserialize, Serialize};
+@@ -12,7 +13,7 @@ use crate::{
+};
+/// Reactor message.
+-#[derive(Debug, Clone, From, Serialize, Deserialize)]
++#[derive(Clone, From, Serialize, Deserialize)]
+pub enum Message {
+/// Consensus component message.
+#[from]
+@@ -55,6 +56,29 @@ impl Message {
+}
+}
++impl Debug for Message {
++ fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
++ match self {
++ Message::Consensus(c) => f.debug_tuple(""Consensus"").field(&c).finish(),
++ Message::DeployGossiper(dg) => f.debug_tuple(""DeployGossiper"").field(&dg).finish(),
++ Message::AddressGossiper(ga) => f.debug_tuple(""AddressGossiper"").field(&ga).finish(),
++ Message::GetRequest { tag, serialized_id } => f
++ .debug_struct(""GetRequest"")
++ .field(""tag"", tag)
++ .field(""serialized_item"", &HexFmt(serialized_id))
++ .finish(),
++ Message::GetResponse {
++ tag,
++ serialized_item,
++ } => f
++ .debug_struct(""GetResponse"")
++ .field(""tag"", tag)
++ .field(""serialized_item"", &HexFmt(serialized_item))
++ .finish(),
++ }
++ }
++}
++
+impl Display for Message {
+fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+match self {
+",Add Debug implementation for Message enum variants.,supported,exact_core,
+S014,js,"mmm a / packages / container / lib / container . js
+ppp b / packages / container / lib / container . js
+Container . prototype = {
+function wrapManagerInDeprecationProxy ( manager ) {
+if ( HAS_NATIVE_PROXY ) {
+let validator = {
+- get ( obj , prop ) {
+- if ( prop ! = = ' class ' & & prop ! = = ' create ' ) {
+- throw new Error ( ` You attempted to access "" $ { prop } "" on a factory manager created by container # factoryFor . "" $ { prop } "" is not a member of a factory manager . "" ` ) ;
+- }
+-
+- return obj [ prop ] ;
+- } ,
+set ( obj , prop , value ) {
+throw new Error ( ` You attempted to set "" $ { prop } "" on a factory manager created by container # factoryFor . A factory manager is a read - only construct . ` ) ;
+} 
+
+",[ BUGFIX ] Improve fastboot debugger / repl experience,neutral,external_context,
+S026,php,"mmm a / core/console/Application.php
+ppp b / core/console/Application.php 
+@@ -53,7 +53,7 @@ class Application extends \yii\console\Application
+{
+return array_merge($this->luyaCoreComponents(), [
+'errorHandler' => ['class' => 'luya\console\ErrorHandler'],
+- 'urlManager' => ['class' => 'yii\web\UrlManager'], // add for console commands with view files
++ 'urlManager' => ['class' => 'yii\web\UrlManager', 'enablePrettyUrl' => true, 'showScriptName' => false], // add for console commands with view files
+]);
+}
+}
+","""Update URL manager config in Application.php""",neutral,too_abstract,
+S027,cpp,"mmm a / Code / CryEngine / CryAction / GameVolumes / GameVolumesManager . cpp
+ppp b / Code / CryEngine / CryAction / GameVolumes / GameVolumesManager . cpp
+void CGameVolumesManager : : ResolveEntityIdsFromGUIDs ( )
+for ( uint32 index = 0 ; index < count ; + + index )
+{
+const EntityId entityId = gEnv - > pEntitySystem - > FindEntityByGuid ( m_volumesData [ index ] . entityGUID ) ;
+- CRY_ASSERT ( entityId ! = INVALID_ENTITYID ) ;
++
++ / / This is a valid case for some volumes which are baked ( e . g . CLedgeObjectStatic ) and not spawned as entity .
++ if ( entityId = = INVALID_ENTITYID )
++ continue ;
++
+m_entityToIndexMap [ entityId ] = index ;
+}
+} 
+
+",Add comment and condition to handle invalid entity IDs in ResolveEntityIdsFromGUIDs(),supported,exact_core,
+S032,php,"mmm a / None
+ppp b / Resources/bin/translation-status.php 
++<?php
++
++/*
++ * This file is part of the Symfony package.
++ *
++ * (c) Fabien Potencier <fabien@symfony.com>
++ *
++ * For the full copyright and license information, please view the LICENSE
++ * file that was distributed with this source code.
++ */
++
++$usageInstructions = <<<END
++
++ Usage instructions
++ -------------------------------------------------------------------------------
++
++ $ cd symfony-code-root-directory/
++
++ # show the translation status of all locales
++ $ php translation-status.php
++
++ # show the translation status of all locales and all their missing translations
++ $ php translation-status.php -v
++
++ # show the status of a single locale
++ $ php translation-status.php fr
++
++ # show the status of a single locale and all its missing translations
++ $ php translation-status.php fr -v
++
++END;
++
++$config = [
++ // if TRUE, the full list of missing translations is displayed
++ 'verbose_output' => false,
++ // NULL = analyze all locales
++ 'locale_to_analyze' => null,
++ // the reference files all the other translations are compared to
++ 'original_files' => [
++ 'src/Symfony/Component/Form/Resources/translations/validators.en.xlf',
++ 'src/Symfony/Component/Security/Core/Resources/translations/security.en.xlf', <nl",[Translation] Added a script to display the status of translations,supported,exact_core,
+S033,cs,"mmm a / src / Tests / Nop . Tests / BaseNopTest . cs
+ppp b / src / Tests / Nop . Tests / BaseNopTest . cs
+
+ using Nop . Core . Caching ;
+using Nop . Core . ComponentModel ;
+using Nop . Core . Configuration ;
++ using Nop . Core . Domain . Catalog ;
+using Nop . Core . Domain . Customers ;
++ using Nop . Core . Domain . Media ;
+using Nop . Core . Events ;
+using Nop . Core . Infrastructure ;
+using Nop . Data ;
+
+ using Nop . Web . Framework . Themes ;
+using Nop . Web . Framework . UI ;
+using Nop . Web . Infrastructure . Installation ;
++ using SixLabors . ImageSharp ;
++ using SixLabors . ImageSharp . PixelFormats ;
++ using SixLabors . ImageSharp . Processing ;
+using IAuthenticationService = Nop . Services . Authentication . IAuthenticationService ;
+using Task = System . Threading . Tasks . Task ;
+
+ static BaseNopTest ( )
+services . AddTransient < IShippingPluginManager , ShippingPluginManager > ( ) ;
+services . AddTransient < ITaxPluginManager , TaxPluginManager > ( ) ;
+
+ - services . AddTransient < IPictureService , PictureService > ( ) ;
++ services . AddTransient < IPictureService , TestPictureService > ( ) ;
+
+ / / register all settings
+var settings = typeFinder . FindClassesOfType ( typeof ( ISettings ) , false ) . ToList ( ) ;
+public async Task < Customer > GetAuthenticatedCustomerAsync ( )
+}
+}
+
+ + protected class Test",Add references and implement custom PictureService for testing purposes.,neutral,diff_insufficient,
+S041,rust,"mmm a / utils/src/field_helpers.rs
+ppp b / utils/src/field_helpers.rs 
+@@ -37,9 +37,7 @@ pub trait FieldHelpers<F> {
+where
+F: PrimeField
+{
+- let mut bytes = big.to_bytes_le();
+- bytes.resize(F::size_in_bytes(), 0);
+- F::from_bytes(&bytes)
++ big.try_into().map_err(|_| FieldHelpersError::DeserializeBytes)
+}
+/// Serialize to bytes
+","""Refactor FieldHelpers trait for better error handling""",neutral,too_abstract,
+S042,js,"mmm a / core / server / api / canary / members . js
+ppp b / core / server / api / canary / members . js
+const members = {
+} , {
+name : ' labels ' ,
+lookup : / labels / i
++ } , {
++ name : ' created_at ' ,
++ lookup : / created_at / i
+} ] ;
+
+ return fsLib . readCSV ( {
+const members = {
+subscribed : subscribed ,
+stripe_customer_id : entry . stripe_customer_id ,
+comped : ( String ( entry . complimentary_plan ) . toLocaleLowerCase ( ) = = = ' true ' ) ,
+- labels : entryLabels
++ labels : entryLabels ,
++ created_at : entry . created_at
+} ]
+} ,
+options : { 
+
+",Added ` created_at ` field to accepted fields for members CSV import,supported,exact_core,
+S048,java,"mmm a / gdx - backend - android / src / com / badlogic / gdx / backends / android / AndroidFont . java
+ppp b / gdx - backend - android / src / com / badlogic / gdx / backends / android / AndroidFont . java
+public int getLineHeight ( ) {
+/ * *
+* { @ inheritDoc }
+* /
+- @ Override
++ Rect tmpRect = new Rect ( ) ;
++ @ Override
+public int getStringWidth ( String text )
+- {
+- Rect rect = new Rect ( ) ;
+- paint . getTextBounds ( text , 0 , text . length ( ) , rect ) ;
+- return rect . width ( ) ;
++ {
++ paint . getTextBounds ( text , 0 , text . length ( ) , tmpRect ) ;
++ return tmpRect . width ( ) ;
+}
+
+ - Rect tmpRect = new Rect ( ) ;
+/ * *
+* { @ inheritDoc }
+* / 
+
+","""Refactored AndroidFont.java: Reduced memory usage by reusing Rect object""",neutral,external_context,
+S050,java,"mmm a / transport / src / main / java / io / netty / channel / local / LocalChannel . java
+ppp b / transport / src / main / java / io / netty / channel / local / LocalChannel . java
+public void run ( ) {
+}
+
+ private void releaseInboundBuffers ( ) {
+- if ( readInProgress ) {
+- return ;
+- }
++ assert eventLoop ( ) = = null | | eventLoop ( ) . inEventLoop ( ) ;
++ readInProgress = false ;
+Queue < Object > inboundBuffer = this . inboundBuffer ;
+Object msg ;
+while ( ( msg = inboundBuffer . poll ( ) ) ! = null ) { 
+
+","""Implemented assertions and added variables in LocalChannel.java""",neutral,near_miss,
+S052,py,"mmm a / youtube_dl / extractor / viki . py
+ppp b / youtube_dl / extractor / viki . py
+class VikiBaseIE ( InfoExtractor ) :
+
+ _token = None
+
+ + _ERRORS = {
++ ' geo ' : ' Sorry , this content is not available in your region . ' ,
++ ' upcoming ' : ' Sorry , this content is not yet available . ' ,
++ # ' paywall ' : ' paywall ' ,
++ }
++
+def _prepare_call ( self , path , timestamp = None , post_data = None ) :
+path + = ' ? ' if ' ? ' not in path else ' & '
+if not timestamp :
+def _raise_error ( self , error ) :
+' % s returned error : % s ' % ( self . IE_NAME , error ) ,
+expected = True )
+
+ + def _check_errors ( self , data ) :
++ for reason , status in data . get ( ' blocking ' , { } ) . items ( ) :
++ if status and reason in self . _ERRORS :
++ raise ExtractorError ( ' % s said : % s ' % (
++ self . IE_NAME , self . _ERRORS [ reason ] ) , expected = True )
++
+def _real_initialize ( self ) :
+self . _login ( )
+
+ class VikiIE ( VikiBaseIE ) :
+' timestamp ' : 1321985454 ,
+' description ' : ' md5 : 44b1e46619df3a072294645c770cef36 ' ,
+' title ' : ' Love In Magic ' ,
++ ' age_limit ' : 13 ,
+} ,
+} ]
+
+ def _real_extract ( self , url ) :
+video = self . _call_api (
+' videos / % s . json ' % video_id , video_id , ' Downloading video JSON ' )
+
+ + self . _check_errors ( video )
++
+title = self . dict_selecti",[ viki ] detect errors and fix formats extraction,neutral,missing_key_detail,
+S053,cpp,"mmm a / plugins / producer_plugin / producer_plugin . cpp
+ppp b / plugins / producer_plugin / producer_plugin . cpp
+class producer_plugin_impl : public std : : enable_shared_from_this < producer_plugin
+return trx - > packed_trx ( ) - > get_unprunable_size ( ) + trx - > packed_trx ( ) - > get_prunable_size ( ) + sizeof ( * trx ) ;
+}
+
+ + void add_size ( const transaction_metadata_ptr & trx ) {
++ auto size = calc_size ( trx ) ;
++ EOS_ASSERT ( size_in_bytes + size < max_incoming_transaction_queue_size , tx_resource_exhaustion , "" Transaction exceeded producer resource limit "" ) ;
++ size_in_bytes + = size ;
++ }
++
+public :
+void set_max_incoming_transaction_queue_size ( uint64_t v ) { max_incoming_transaction_queue_size = v ; }
+
+ void add ( const transaction_metadata_ptr & trx , bool persist_until_expired , next_function < transaction_trace_ptr > next ) {
+- auto size = calc_size ( trx ) ;
+- EOS_ASSERT ( size_in_bytes + size < max_incoming_transaction_queue_size , tx_resource_exhaustion , "" Transaction exceeded producer resource limit "" ) ;
+- size_in_bytes + = size ;
++ add_size ( trx ) ;
++ _incoming_transactions . emplace_back ( trx , persist_until_expired , std : : move ( next ) ) ;
++ }
++
++ void add_front ( const transaction_metadata_ptr & trx , bool persist_until_expired , next_function < transaction_trace_ptr > next ) {
++ add_size ( trx ) ;
+_incoming_transaction",Add front to pending incoming transactions in producer plugin.,neutral,diff_insufficient,
+S059,java,"mmm a / guava / src / com / google / common / base / Objects . java
+ppp b / guava / src / com / google / common / base / Objects . java
+private Objects ( ) { }
+*
+* < p > < b > Note for Java 7 and later : < / b > This method should be treated as
+* deprecated ; use { @ link java . util . Objects # equals } instead .
+- *
+* /
+@ CheckReturnValue
+public static boolean equal ( @ Nullable Object a , @ Nullable Object b ) {
+public static boolean equal ( @ Nullable Object a , @ Nullable Object b ) {
+*
+* < p > < b > Note for Java 7 and later : < / b > This method should be treated as
+* deprecated ; use { @ link java . util . Objects # hash } instead .
+- *
+* /
+public static int hashCode ( @ Nullable Object . . . objects ) {
+return Arrays . hashCode ( objects ) ; 
+
+",Revert base . Objects - > j . u . Objects deprecations until we do the bulk of the migrations ourselves ( blocked : see bug ) .,neutral,external_context,
+S060,java,"mmm a / gdx / src / com / badlogic / gdx / math / Rectangle . java
+ppp b / gdx / src / com / badlogic / gdx / math / Rectangle . java
+public void set ( float x , float y , float width , float height ) {
+}
+
+ / * *
+- * @ param x0 point x coordinate
+- * @ param y0 point y coordinate
++ * @ param x point x coordinate
++ * @ param y point y coordinate
+* @ return whether the point is contained in the rectangle
+* /
+public boolean contains ( float x , float y ) { 
+
+",Update comment for contains method parameters in Rectangle.java,supported,exact_core,
+S061,js,"mmm a / packages / accounts - base / accounts_server . js
+ppp b / packages / accounts - base / accounts_server . js
+Accounts . registerLoginHandler = function ( handler ) {
+loginHandlers = [ ] ;
+
+
+- / / Checks a user ' s credentials against all the registered login handlers , and
+- / / returns a newly created login token if the credentials are valid . It is like
+- / / the login method , except that it doesn ' t set the logged - in user on the
+- / / connection . Throws a Meteor . Error if logging in fails , including the case
+- / / where none of the login handlers handled the login request . Otherwise , returns
+- / / { id : userId , token : * , tokenExpires : * } .
++ / / Checks a user ' s credentials against all the registered login
++ / / handlers , and returns a login token if the credentials are valid . It
++ / / is like the login method , except that it doesn ' t set the logged - in
++ / / user on the connection . Throws a Meteor . Error if logging in fails ,
++ / / including the case where none of the login handlers handled the login
++ / / request . Otherwise , returns { id : userId , token : * , tokenExpires : * } .
+/ /
+/ / For example , if you want to login with a plaintext password , ` options ` could be
+/ / { user : { username : < username > } , password : < password > } , or
+/ / { user : { email : < email > } , password : < password > } .
+- Accounts . createToken =",Fix documentation and rename createToken to _runLoginHandlers,neutral,diff_insufficient,
+S063,rust,"mmm a / node/src/components/small_network.rs
+ppp b / node/src/components/small_network.rs 
+@@ -436,11 +436,14 @@ where
+.peer_addr()
+.expect(""should have peer address"");
+- assert!(
+- self.pending.remove(&peer_address),
+- ""should always add outgoing connect attempts to pendings: {:?}"",
+- self
++ if !self.pending.remove(&peer_address) {
++ info!(
++ %peer_address,
++ ""{}: this peer's incoming connection has dropped, so don't establish an outgoing"",
++ self.our_id
+);
++ return Effects::new();
++ }
+// If we have connected to ourself, allow the connection to drop.
+if peer_id == self.our_id {
+",NO-TICKET: avoid panic if an incoming connection drops while an outgoing is being established,supported,exact_core,
+S064,cpp,"mmm a / src / rpc / net . cpp
+ppp b / src / rpc / net . cpp
+static RPCHelpMan getpeerinfo ( )
+{ RPCResult : : Type : : BOOL , "" inbound "" , "" Inbound ( true ) or Outbound ( false ) "" } ,
+{ RPCResult : : Type : : BOOL , "" addnode "" , "" Whether connection was due to addnode / - connect or if it was an automatic / inbound connection \ n ""
+"" ( DEPRECATED , returned only if the config option - deprecatedrpc = getpeerinfo_addnode is passed ) "" } ,
+- { RPCResult : : Type : : STR , "" connection_type "" , "" Type of connection : \ n "" + Join ( CONNECTION_TYPE_DOC , "" , \ n "" ) + "" . "" } ,
++ { RPCResult : : Type : : STR , "" connection_type "" , "" Type of connection : \ n "" + Join ( CONNECTION_TYPE_DOC , "" , \ n "" ) + "" . \ n ""
++ "" Please note this output is unlikely to be stable in upcoming releases as we iterate to \ n ""
++ "" best capture connection behaviors . "" } ,
+{ RPCResult : : Type : : NUM , "" startingheight "" , "" The starting height ( block ) of the peer "" } ,
+{ RPCResult : : Type : : NUM , "" banscore "" , "" The ban score ( DEPRECATED , returned only if config option - deprecatedrpc = banscore is passed ) "" } ,
+{ RPCResult : : Type : : NUM , "" synced_headers "" , "" The last header we have in common with this peer "" } , 
+
+",Update RPC help for getpeerinfo to include connection type and ban score.,neutral,near_miss,
+S066,cpp,"mmm a / lib / Sema / TypeCheckDecl . cpp
+ppp b / lib / Sema / TypeCheckDecl . cpp
+static void finalizeType ( TypeChecker & TC , NominalTypeDecl * nominal ) {
+
+ TC . validateDecl ( VD ) ;
+
+ + TC . requestMemberLayout ( VD ) ;
++
+/ / The only thing left to do is synthesize storage for lazy variables .
+auto * prop = dyn_cast < VarDecl > ( D ) ;
+if ( ! prop ) 
+
+",[ Type checker ] Request member layout for a member of a finalized type .,supported,exact_core,
+S068,java,"mmm a / gdx / src / com / badlogic / gdx / utils / Array . java
+ppp b / gdx / src / com / badlogic / gdx / utils / Array . java
+public void shuffle ( ) {
+* < p >
+* If { @ link Collections # allocateIterators } is false , the same iterator instance is returned each time this method is called .
+* Use the { @ link ArrayIterator } constructor for nested or multithreaded iteration . * /
+- public Iterator < T > iterator ( ) {
++ public ArrayIterator < T > iterator ( ) {
+if ( Collections . allocateIterators ) return new ArrayIterator ( this , true ) ;
+if ( iterable = = null ) iterable = new ArrayIterable ( this ) ;
+return iterable . iterator ( ) ;
+public void reset ( ) {
+index = 0 ;
+}
+
+ - public Iterator < T > iterator ( ) {
++ public ArrayIterator < T > iterator ( ) {
+return this ;
+}
+}
+public ArrayIterable ( Array < T > array , boolean allowRemove ) {
+}
+
+ / * * @ see Collections # allocateIterators * /
+- public Iterator < T > iterator ( ) {
++ public ArrayIterator < T > iterator ( ) {
+if ( Collections . allocateIterators ) return new ArrayIterator ( array , allowRemove ) ;
+/ / lastAcquire . getBuffer ( ) . setLength ( 0 ) ;
+/ / new Throwable ( ) . printStackTrace ( new java . io . PrintWriter ( lastAcquire ) ) ; 
+
+","""Implemented ArrayIterator and fixed iterator method""",neutral,near_miss,
+S069,rust,"mmm a / node/src/components/consensus/highway_core/highway_testing.rs
+ppp b / node/src/components/consensus/highway_core/highway_testing.rs 
+@@ -304,7 +304,22 @@ where
+F: FnOnce(&mut Highway<Ctx>) -> Vec<Effect<Ctx>>,
+{
+let res = f(self.validator_mut(validator_id)?.consensus.highway_mut());
+- Ok(res.into_iter().map(HighwayMessage::from).collect())
++ let mut additional_effects = vec![];
++ for e in res.iter() {
++ if let Effect::NewVertex(vv) = e {
++ additional_effects.extend(
++ self.validator_mut(validator_id)?
++ .consensus
++ .highway_mut()
++ .add_valid_vertex(vv.clone()),
++ );
++ }
++ }
++ additional_effects.extend(res);
++ Ok(additional_effects
++ .into_iter()
++ .map(HighwayMessage::from)
++ .collect())
+}
+/// Processes a message sent to `validator_id`.
+@@ -341,14 +356,7 @@ where
+.ok_or_else(|| TestRunError::NoConsensusValues)?;
+self.call_validator(&validator_id, |consensus| {
+- let mut effects = consensus.propose(consensus_value, block_context);
+- let additional_effects = match &*effects {
+- // We want to add the new vertex to creator's state immediately.
+- [Effect::NewVertex(vv)] => consensus.add_valid_vertex(vv.clone()),
+- _ => vec![],
+- };
+- effects.extend(additional_effects);
+- effects
++ consensus.propose(consensus_value, block_context)
+})?
+}
+}
+@@ -476,9 +484,7 @@ where
+) -> Res","NO-TICKET: When validator produces new vertex, add it to its state.",supported,exact_core,
+S071,js,"mmm a / src / dom / index . js
+ppp b / src / dom / index . js
+export function getAccessor ( node , name , value , cache ) {
+* /
+export function setAccessor ( node , name , value ) {
+if ( name = = = ' class ' ) {
+- node . className = value ;
++ node . className = value | | ' ' ;
+}
+else if ( name = = = ' style ' ) {
+- node . style . cssText = value ;
++ node . style . cssText = value | | ' ' ;
+}
+else if ( name = = = ' dangerouslySetInnerHTML ' ) {
+node . innerHTML = value . __html ; 
+
+","Coerce falsey ` className ` and ` style ` values to an empty string to avoid ` class = "" null "" ` and ` style = "" null "" ` .",neutral,external_context,
+S072,java,"mmm a / core / src / main / java / hudson / Util . java
+ppp b / core / src / main / java / hudson / Util . java
+
+ import java . text . NumberFormat ;
+import java . text . ParseException ;
+import java . util . * ;
++ import java . util . concurrent . TimeUnit ;
+import java . util . concurrent . atomic . AtomicBoolean ;
+import java . util . logging . Level ;
+import java . util . logging . Logger ;
+private static boolean createSymlinkJava7 ( File baseDir , String targetPath , Strin
+Object target = Class . forName ( "" java . nio . file . Paths "" ) . getMethod ( "" get "" , String . class , String [ ] . class ) . invoke ( null , targetPath , new String [ 0 ] ) ;
+Class < ? > filesC = Class . forName ( "" java . nio . file . Files "" ) ;
+Class < ? > pathC = Class . forName ( "" java . nio . file . Path "" ) ;
+- filesC . getMethod ( "" deleteIfExists "" , pathC ) . invoke ( null , path ) ;
++ Class < ? > fileAlreadyExistsExceptionC = Class . forName ( "" java . nio . file . FileAlreadyExistsException "" ) ;
++
+Object noAttrs = Array . newInstance ( Class . forName ( "" java . nio . file . attribute . FileAttribute "" ) , 0 ) ;
+- filesC . getMethod ( "" createSymbolicLink "" , pathC , pathC , noAttrs . getClass ( ) ) . invoke ( null , path , target , noAttrs ) ;
++ final int maxNumberOfTries = 4 ;
++ final int timeInMillis = 100 ;
++ for ( int tryNumber = 1 ; tryNumber < = maxNumberOfTries ; tryNumber +","""Adds retry logic to createSymbolicLink method""",neutral,diff_insufficient,
+S074,cs,"mmm a / RestSharp . Tests / XmlDeserializerTests . cs
+ppp b / RestSharp . Tests / XmlDeserializerTests . cs
+private string PathFor ( string sampleFile )
+return Path . Combine ( SampleDataPath , sampleFile ) ;
+}
+
+ + [ Fact ]
++ public void Can_Deserialize_Into_Struct ( )
++ {
++ const string content = "" < root > < one > oneOneOne < / one > < two > twoTwoTwo < / two > < three > 3 < / three > < / root > "" ;
++ var xml = new XmlDeserializer ( ) ;
++ var output = xml . Deserialize < SimpleStruct > ( new RestResponse { Content = content } ) ;
++
++ Assert . NotNull ( output ) ;
++ Assert . Equal ( "" oneOneOne "" , output . One ) ;
++ Assert . Equal ( "" twoTwoTwo "" , output . Two ) ;
++ Assert . Equal ( 3 , output . Three ) ;
++ }
+[ Fact ]
+public void Can_Deserialize_Lists_of_Simple_Types ( )
+{
+public void Can_Deserialize_Lists_of_Simple_Types ( )
+var doc = XDocument . Load ( xmlpath ) ;
+
+ var xml = new XmlDeserializer ( ) ;
+- var output = xml . Deserialize < SimpleTypesListSample > ( new RestResponse ( ) { Content = doc . ToString ( ) } ) ;
++ var output = xml . Deserialize < SimpleTypesListSample > ( new RestResponse { Content = doc . ToString ( ) } ) ;
+
+ Assert . NotEmpty ( output . Names ) ;
+Assert . NotEmpty ( output . Numbers ) ;
+public void Can_Deserialize_Elements_to_Nullable_Values ( )
+{
+var culture = CultureInfo . InvariantCulture ; <",Added a test to deserialize xml into a struct,supported,exact_core,
+S075,java,"mmm a / src / com . oracle . truffle . espresso / src / com / oracle / truffle / espresso / substitutions / Target_java_lang_reflect_Array . java
+ppp b / src / com . oracle . truffle . espresso / src / com / oracle / truffle / espresso / substitutions / Target_java_lang_reflect_Array . java
+public static Object newArray ( @ Host ( Class . class ) StaticObject componentType , int
+throw meta . throwEx ( meta . NegativeArraySizeException ) ;
+}
+}
++ if ( dimensions . length = = 1 ) {
++ / / getArrayClass ( 0 ) is undefined .
++ return meta . getInterpreterToVM ( ) . newMultiArray ( component , dimensions ) ;
++ }
+return meta . getInterpreterToVM ( ) . newMultiArray ( component . getArrayClass ( dimensions . length - 1 ) , dimensions ) ;
+}
+
+
+",[ GR - 18478 ] j . l . reflect . Array . newMultiArray returns incorrect type with single dimension .,neutral,external_context,
+S077,cpp,"mmm a / src / mongo / dbtests / jstests . cpp
+ppp b / src / mongo / dbtests / jstests . cpp
+namespace JSTests {
+}
+} ;
+
+ - class DBRefTest {
+- public :
+- DBRefTest ( ) {
+- _a = "" unittest . dbref . a "" ;
+- _b = "" unittest . dbref . b "" ;
+- reset ( ) ;
+- }
+- ~ DBRefTest ( ) {
+- / / reset ( ) ;
+- }
++ namespace RoundTripTests {
+
+ - void run ( ) {
++ / / Inherit from this class to test round tripping of JSON objects
++ class TestRoundTrip {
++ public :
++ virtual ~ TestRoundTrip ( ) { }
++ void run ( ) {
+
+ - client . insert ( _a , BSON ( "" a "" < < "" 17 "" ) ) ;
++ / / Insert in Javascript - > Find using DBDirectClient
+
+ - {
+- BSONObj fromA = client . findOne ( _a , BSONObj ( ) ) ;
+- verify ( fromA . valid ( ) ) ;
+- / / cout < < "" Froma : "" < < fromA < < endl ;
++ / / Drop the collection
++ client . dropCollection ( "" unittest . testroundtrip "" ) ;
++
++ / / Insert in Javascript
++ stringstream jsInsert ;
++ jsInsert < < "" db . testroundtrip . insert ( "" < < jsonIn ( ) < < "" ) "" ;
++ ASSERT_TRUE ( client . eval ( "" unittest "" , jsInsert . str ( ) ) ) ;
++
++ / / Find using DBDirectClient
++ BSONObj excludeIdProjection = BSON ( "" _id "" < < 0 ) ;
++ BSONObj directFind = client . findOne ( "" unittest . testroundtrip "" ,
++ "" "" ,
++ & excludeIdProjection ) ;
++ bsonEquals ( bson ( ) , directFi","""Add DBRef, DBPointer and Object tests""",neutral,diff_insufficient,
+S081,cpp,"mmm a / src / mongo / db / transaction_participant . cpp
+ppp b / src / mongo / db / transaction_participant . cpp
+Timestamp TransactionParticipant : : Participant : : prepareTransaction (
+/ / instead .
+LOGV2_FATAL ( 22525 ,
+"" Caught exception during abort of prepared transaction ""
+- "" { opCtx_getTxnNumber } on { sessionId } : { exceptionToStatus } "" ,
+- "" opCtx_getTxnNumber "" _attr = opCtx - > getTxnNumber ( ) ,
+- "" sessionId "" _attr = _sessionId ( ) . toBSON ( ) ,
++ "" { txnNumber } on { lsid } : { exceptionToStatus } "" ,
++ "" txnNumber "" _attr = opCtx - > getTxnNumber ( ) ,
++ "" lsid "" _attr = _sessionId ( ) . toBSON ( ) ,
+"" exceptionToStatus "" _attr = exceptionToStatus ( ) ) ;
+std : : terminate ( ) ;
+}
+Timestamp TransactionParticipant : : Participant : : prepareTransaction (
+LOGV2 ( 22521 ,
+"" transaction - hangAfterReservingPrepareTimestamp fail point ""
+"" enabled . Blocking until fail point is disabled . Prepare OpTime : ""
+- "" { prepareOplogSlot } "" ,
+- "" prepareOplogSlot "" _attr = prepareOplogSlot ) ;
++ "" { prepareOpTime } "" ,
++ "" prepareOpTime "" _attr = prepareOplogSlot ) ;
+hangAfterReservingPrepareTimestamp . pauseWhileSet ( ) ;
+}
+}
+void TransactionParticipant : : Participant : : commitPreparedTransaction (
+/ / It is illegal for committing a prepared transaction to fail for any reason , other than an
+/ / invalid command , so we crash i",SERVER - 46072 Improve log attributes for transaction_participant . cpp,neutral,external_context,
+S083,js,"mmm a / select2 . js
+ppp b / select2 . js
+
+ var selected = element . find ( "" : selected "" ) ;
+/ / a single select box always has a value , no need to null check ' selected '
+if ( $ . isFunction ( callback ) )
+- callback ( { id : selected . attr ( "" value "" ) , text : selected . text ( ) } ) ;
++ callback ( { id : selected . attr ( "" value "" ) , text : selected . text ( ) , element : selected } ) ;
+} ;
+}
+
+
+",pass element attr to initSelection for selects upon init,neutral,near_miss,
+S084,go,"mmm a / store/store.go
+ppp b / store/store.go 
+@@ -498,6 +498,11 @@ func (s *Store) Stats() (map[string]interface{}, error) {
+return nil, err
+}
++ dirSz, err := dirSize(s.raftDir)
++ if err != nil {
++ return nil, err
++ }
++
+status := map[string]interface{}{
+""node_id"": s.raftID,
+""raft"": raftStats,
+@@ -516,6 +521,7 @@ func (s *Store) Stats() (map[string]interface{}, error) {
+""metadata"": s.meta,
+""nodes"": nodes,
+""dir"": s.raftDir,
++ ""dir_size"": dirSz,
+""sqlite3"": dbStatus,
+""db_conf"": s.dbConf,
+}
+@@ -1421,3 +1427,18 @@ func pathExists(p string) bool {
+}
+return true
+}
++
++// dirSize returns the total size of all files in the given directory
++func dirSize(path string) (int64, error) {
++ var size int64
++ err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
++ if err != nil {
++ return err
++ }
++ if !info.IsDir() {
++ size += info.Size()
++ }
++ return err
++ })
++ return size, err
++}
+",Add total Raft directory size to Store stats,supported,exact_core,
+S085,py,"mmm a / IPython / core / magics / script . py
+ppp b / IPython / core / magics / script . py
+def _script_magics_default ( self ) :
+' python2 ' ,
+' python3 ' ,
+' pypy ' ,
+- ' julia ' ,
+]
+if os . name = = ' nt ' :
+defaults . extend ( [ 
+
+","Revert "" Add Julia to default script magics . """,supported,exact_core,
+S090,cpp,"mmm a / hphp / runtime / vm / jit / print . cpp
+ppp b / hphp / runtime / vm / jit / print . cpp
+void print ( std : : ostream & os , const Block * block ,
+}
+
+ os < < std : : string ( kIndent - 2 , ' ' ) ;
+- if ( auto next = block - > next ( ) ) {
++ auto next = block - > empty ( ) ? nullptr : block - > next ( ) ;
++ if ( next ) {
+os < < punc ( "" - > "" ) ;
+printLabel ( os , next ) ;
+os < < ' \ n ' ; 
+
+",Avoid assertion failure while trying to print an empty block,neutral,external_context,
+S091,rust,"mmm a / vm/types/src/genesis_config.rs
+ppp b / vm/types/src/genesis_config.rs 
+@@ -268,8 +268,6 @@ impl BuiltinNetworkID {
+pub fn boot_nodes_domain(self) -> String {
+match self {
+BuiltinNetworkID::Test | BuiltinNetworkID::Dev => ""localhost"".to_string(),
+- BuiltinNetworkID::Halley => ""halley1.seed.starcoin.org"".to_string(),
+- BuiltinNetworkID::Proxima => ""proxima1.seed.starcoin.org"".to_string(),
+_ => format!(""{}.seed.starcoin.org"", self),
+}
+}
+",Remove boot node domains for Halley and Proxima networks.,supported,exact_core,
+S092,py,"mmm a / IPython / core / magics / script . py
+ppp b / IPython / core / magics / script . py
+def _script_magics_default ( self ) :
+' python2 ' ,
+' python3 ' ,
+' pypy ' ,
+- ' julia ' ,
+]
+if os . name = = ' nt ' :
+defaults . extend ( [ 
+
+","""Update script magic defaults for Python 2, 3, and PyPy""",neutral,near_miss,
+S094,js,"mmm a / src / loader / filetypes / HTML5AudioFile . js
+ppp b / src / loader / filetypes / HTML5AudioFile . js
+var HTML5AudioFile = new Class ( {
+for ( var i = 0 ; i < instances ; i + + )
+{
+var audio = new Audio ( ) ;
+- audio . name = this . key + ( ' 0 ' + i ) . slice ( - 2 ) ; / / Useful for debugging
++ audio . dataset . name = this . key + ( ' 0 ' + i ) . slice ( - 2 ) ; / / Useful for debugging
+audio . dataset . used = ' false ' ;
+
+ if ( ! touchLocked ) 
+
+",audio tag does not support name attribute so setting that value to dataset,neutral,external_context,
+S097,java,"mmm a / spring - boot - actuator / src / main / java / org / springframework / boot / actuate / system / ApplicationPidFileWriter . java
+ppp b / spring - boot - actuator / src / main / java / org / springframework / boot / actuate / system / ApplicationPidFileWriter . java
+public void onApplicationEvent ( SpringApplicationEvent event ) {
+writePidFile ( event ) ;
+}
+catch ( Exception ex ) {
+- logger . warn ( String . format ( "" Cannot create pid file % s "" , this . file ) ) ;
++ logger . warn ( String . format ( "" Cannot create pid file % s "" , this . file ) , ex ) ;
+}
+}
+} 
+
+",Include exception in warning message when pid file cannot be created,supported,exact_core,
+S098,java,"new file mode 100644
+index 0000000000000 . . 0fbe3e36e4445
+mmm / dev / null
+ppp b / src / test / java / org / elasticsearch / watcher / WatcherF . java
+
+ + / *
++ * Copyright Elasticsearch B . V . and / or licensed to Elasticsearch B . V . under one
++ * or more contributor license agreements . Licensed under the Elastic License ;
++ * you may not use this file except in compliance with the Elastic License .
++ * /
++ package org . elasticsearch . watcher ;
++
++ import org . elasticsearch . bootstrap . ElasticsearchF ;
++ import org . elasticsearch . license . plugin . LicensePlugin ;
++
++ / * *
++ * Main class to easily run Watcher from a IDE .
++ * It sets all the options to run the Watcher plugin and access it from Sense , but doesn ' t run with Shield .
++ *
++ * During startup an error will be printed that the config directory can ' t be found , to fix this :
++ * 1 ) Add a config directly to the top level project directory
++ * 2 ) or set ` - Des . path . conf = ` to a location where there is a config directory on your machine .
++ * /
++ public class WatcherF {
++
++ public static void main ( String [ ] args ) {
++ System . setProperty ( "" es . http . cors . enabled "" , "" true "" ) ;
++ System . setProperty ( "" es . script . disable_dynamic "" , "" false "" ) ;
++ System . setProperty ( "" es . shield . enabled "" , "" false "" ) ;
++ System . setProperty ( ",test : Add a simple runner that allows to run Watcher from the IDE and work out of the box with Sense .,supported,exact_core,
+S099,php,"mmm a / modules/admin/src/commands/ProxyController.php
+ppp b / modules/admin/src/commands/ProxyController.php 
+@@ -12,12 +12,23 @@ use luya\helpers\Url;
+use luya\console\Command;
+/**
+- * Proxy Sync Command.
++ * Synchronise a PROD env to your locale env with files and images.
++ *
++ * The proxy command will ask for an url, identifier and token. The url is the url of your website in production where you have leased the token and
++ * identifier inside the admin. Make sure you are using the right protocol (with or without https)!
++ *
++ * e.g url: `https://luya.io` or if you are using a domain with www `http://www.example.com` depending on your server configuration.
+*
+* ```sh
+* ./vendor/bin/luya admin/proxy
+* ```
+*
++ * You can also provide all prompted options in order to not used an interactive mode:
++ *
++ * ```sh
++ * ./vendor/bin/luya admin/proxy --url=https://example.com --idf=lcp58e35acb4ca69 --token=ESOH1isB3ka_dF09ozkDJewpeecGCdUw
++ * ```
++ *
+* Options:
+*
+* ```sh
+@@ -72,12 +83,31 @@ class ProxyController extends Command
+*/
+public $table = null;
++ /**
++ * @var string The production environment Domain where your LUYA application is running in production mode make so to use the right protocolo
++ * examples:
++ * - https://luya.io
++ * - http://www.example.com
++ *
++ */
++ public $url = null;
++
++ /*","""Update ProxyController: Synchronise PROD env to local with files and images""",supported,exact_core,
+S100,py,"mmm a / lib / ansible / playbook / play . py
+ppp b / lib / ansible / playbook / play . py
+def __init__ ( self , playbook , ds , basedir , vault_password = None ) :
+self . sudo = ds . get ( ' sudo ' , self . playbook . sudo )
+self . sudo_user = ds . get ( ' sudo_user ' , self . playbook . sudo_user )
+self . transport = ds . get ( ' connection ' , self . playbook . transport )
+- self . gather_facts = ds . get ( ' gather_facts ' , None )
+self . remote_port = self . remote_port
+self . any_errors_fatal = utils . boolean ( ds . get ( ' any_errors_fatal ' , ' false ' ) )
+self . accelerate = utils . boolean ( ds . get ( ' accelerate ' , ' false ' ) )
+def __init__ ( self , playbook , ds , basedir , vault_password = None ) :
+self . su_user = ds . get ( ' su_user ' , self . playbook . su_user )
+# self . vault_password = vault_password
+
+ + # gather_facts is not a simple boolean , as None means that a ' smart '
++ # fact gathering mode will be used , so we need to be careful here as
++ # calling utils . boolean ( None ) returns False
++ self . gather_facts = ds . get ( ' gather_facts ' , None )
++ if self . gather_facts :
++ self . gather_facts = utils . boolean ( self . gather_facts )
++
+# Fail out if user specifies a sudo param with a su param in a given play
+if ( ds . get ( ' sudo ' ) or ds . get ( ' sudo_user ' ) ) and ( ds . get ( ' su ' ) or ds . get ( ' su_user ' ) ) :
+raise e",Refactor Ansible playbook initialization to use more robust logic for gather_facts.,neutral,external_context,
+S102,cs,"mmm a / src / EditorFeatures / CSharp / CompleteStatement / CompleteStatementCommandHandler . cs
+ppp b / src / EditorFeatures / CSharp / CompleteStatement / CompleteStatementCommandHandler . cs
+private static bool SemiColonIsMissing ( SyntaxNode currentNode )
+case SyntaxKind . AddAccessorDeclaration :
+return ( ( AccessorDeclarationSyntax ) currentNode ) . SemicolonToken . IsMissing ;
+default :
++ / / At this point , the node should be empty or its children should not end with a semicolon .
++ Debug . Assert ( ! currentNode . ChildNodesAndTokens ( ) . Any ( )
++ | | ! currentNode . ChildNodesAndTokens ( ) . Last ( ) . IsKind ( SyntaxKind . SemicolonToken ) ) ;
+return false ;
+}
+} 
+
+",Fix missing semicolon in CompleteStatementCommandHandler.cs.,neutral,near_miss,
+S106,js,"mmm a / v3 / src / sound / html5 / HTML5AudioSoundManager . js
+ppp b / v3 / src / sound / html5 / HTML5AudioSoundManager . js
+var HTML5AudioSoundManager = new Class ( {
+Extends : BaseSoundManager ,
+initialize : function HTML5AudioSoundManager ( game ) {
+this . onBlurPausedSounds = [ ] ;
++ this . _mute = false ;
+BaseSoundManager . call ( this , game ) ;
+} ,
+add : function ( key , config ) { 
+
+",Add instance variable _mute to HTML5AudioSoundManager class.,supported,exact_core,
+S109,py,"new file mode 100755
+index 0000000000000 . . 93ef14b4831a8
+mmm / dev / null
+ppp b / Mac / scripts / buildappbundle . py
+
+ + import sys
++ import os
++ import shutil
++ import getopt
++
++ def buildappbundle ( executable , output = None , copyfunc = None , creator = None ,
++ plist = None , nib = None , resources = None ) :
++ if not output :
++ output = os . path . split ( executable ) [ 1 ] + ' . app '
++ if not copyfunc :
++ copyfunc = shutil . copy2
++ if not creator :
++ creator = ' ? ? ? ? '
++ if not resources :
++ resources = [ ]
++ if nib :
++ resources = resources + [ nib ]
++ #
++ # Create the main directory structure
++ #
++ if not os . path . isdir ( output ) :
++ os . mkdir ( output )
++ contents = os . path . join ( output , ' Contents ' )
++ if not os . path . isdir ( contents ) :
++ os . mkdir ( contents )
++ macos = os . path . join ( contents , ' MacOS ' )
++ if not os . path . isdir ( macos ) :
++ os . mkdir ( macos )
++ #
++ # Create the executable
++ #
++ shortname = os . path . split ( executable ) [ 1 ]
++ execname = os . path . join ( macos , shortname )
++ try :
++ os . remove ( execname )
++ except OSError :
++ pass
++ copyfunc ( executable , execname )
++ #
++ # Create the PkgInfo file
++ #
++ pkginfo = os . path . join ( contents , ' PkgInfo ' )
++ open ( pkgin",Add script to build macOS application bundles from Python,supported,exact_core,
+S110,py,"mmm a / lib / matplotlib / widgets . py
+ppp b / lib / matplotlib / widgets . py
+def __init__ ( self , ax , labels , active = 0 , activecolor = ' blue ' ) :
+def _clicked ( self , event ) :
+if event . button ! = 1 : return
+if event . inaxes ! = self . ax : return
+- xy = self . ax . transAxes . inverse_xy_tup ( ( event . x , event . y ) )
++ xy = self . ax . transAxes . inverted ( ) . transform_point ( ( event . x , event . y ) )
+pclicked = np . array ( [ xy [ 0 ] , xy [ 1 ] ] )
+def inside ( p ) :
+pcirc = np . array ( [ p . center [ 0 ] , p . center [ 1 ] ] ) 
+
+",Update transformation method call in widget initialization.,neutral,near_miss,
+S112,cs,"mmm a / src / MusicStore / Controllers / StoreManagerController . cs
+ppp b / src / MusicStore / Controllers / StoreManagerController . cs
+public IActionResult Edit ( Album album )
+/ /
+/ / GET : / StoreManager / Delete / 5
+
+ + [ HttpGet ]
+public IActionResult Delete ( int id = 0 )
+{
+Album album = db . Albums . Single ( a = > a . AlbumId = = id ) ; 
+
+",Adding a [ HttpGet ] attribute to enable the Delete album from the store functionality .,neutral,external_context,
+S114,js,"mmm a / pdf . js
+ppp b / pdf . js
+var CanvasGraphics = ( function ( ) {
+w : "" setLineWidth "" ,
+J : "" setLineCap "" ,
+j : "" setLineJoin "" ,
++ M : "" setMiterLimit "" ,
+d : "" setDash "" ,
+ri : "" setRenderingIntent "" ,
+i : "" setFlatness "" ,
+var CanvasGraphics = ( function ( ) {
+m : "" moveTo "" ,
+l : "" lineTo "" ,
+c : "" curveTo "" ,
++ v : "" curveTo2 "" ,
++ y : "" curveTo3 "" ,
+h : "" closePath "" ,
+re : "" rectangle "" ,
+S : "" stroke "" ,
++ s : "" closeStroke "" ,
+f : "" fill "" ,
+"" f * "" : "" eoFill "" ,
+B : "" fillStroke "" ,
++ "" B * "" : "" eoFillStroke "" ,
+b : "" closeFillStroke "" ,
++ "" b * "" : "" closeEOFillStroke "" ,
+n : "" endPath "" ,
+
+ / / Clipping
+var CanvasGraphics = ( function ( ) {
+/ / Text
+BT : "" beginText "" ,
+ET : "" endText "" ,
++ Tc : "" setCharSpacing "" ,
++ Tw : "" setWordSpacing "" ,
++ Tz : "" setHScale "" ,
+TL : "" setLeading "" ,
+Tf : "" setFont "" ,
++ Tr : "" setTextRenderingMode "" ,
++ Ts : "" setTextRise "" ,
+Td : "" moveText "" ,
++ TD : "" setLeadingMoveText "" ,
+Tm : "" setTextMatrix "" ,
+"" T * "" : "" nextLine "" ,
+Tj : "" showText "" ,
+TJ : "" showSpacedText "" ,
++ "" ' "" : "" nextLineShowText "" ,
++ ' "" ' : "" nextLineSetSpacingShowText "" ,
+
+ / / Type3 fonts
++ d0 : "" setCharWidth "" ,
++ d1 : "" setCharWidthAndBounds "" ,
+
+ / / Color
+CS : "" setStrokeColorS","""Refactor CanvasGraphics class to use modern JavaScript syntax and improve code readability""",contradicted,different_change,
+S115,php,"mmm a / Extractor/Visitor/AbstractVisitor.php
+ppp b / Extractor/Visitor/AbstractVisitor.php 
+@@ -42,32 +42,31 @@ abstract class AbstractVisitor
+protected function getStringArguments(Node\Expr\CallLike|Node\Attribute|Node\Expr\New_ $node, int|string $index, bool $indexIsRegex = false): array
+{
+- $args = $node instanceof Node\Expr\CallLike ? $node->getArgs() : $node->args;
+-
+if (\is_string($index)) {
+return $this->getStringNamedArguments($node, $index, $indexIsRegex);
+}
++ $args = $node instanceof Node\Expr\CallLike ? $node->getRawArgs() : $node->args;
++
+if (\count($args) < $index) {
+return [];
+}
+- /** @var Node\Arg $arg */
+- $arg = $args[$index];
+- if (!$result = $this->getStringValue($arg->value)) {
+- return [];
++ if (($arg = $args[$index]) instanceof Node\Arg) {
++ if ($result = $this->getStringValue($arg->value)) {
++ return [$result];
++ }
+}
+- return [$result];
++ return [];
+}
+protected function hasNodeNamedArguments(Node\Expr\CallLike|Node\Attribute|Node\Expr\New_ $node): bool
+{
+- $args = $node instanceof Node\Expr\CallLike ? $node->getArgs() : $node->args;
++ $args = $node instanceof Node\Expr\CallLike ? $node->getRawArgs() : $node->args;
+- /** @var Node\Arg $arg */
+foreach ($args as $arg) {
+- if (null !== $arg->name) {
++ if ($arg instanceof Node\Arg && null !== $arg->name) {
+return true;
+}
+} 
+",[Translation] Fix extraction when dealing with VariadicPlaceholder parameters,neutral,external_context,
+S117,cpp,"mmm a / lib / Sema / PlaygroundTransform . cpp
+ppp b / lib / Sema / PlaygroundTransform . cpp
+class Instrumenter : InstrumenterBase {
+return S ;
+case StmtKind : : Brace :
+return transformBraceStmt ( cast < BraceStmt > ( S ) ) ;
++ case StmtKind : : Defer :
++ return transformDeferStmt ( cast < DeferStmt > ( S ) ) ;
+case StmtKind : : If :
+return transformIfStmt ( cast < IfStmt > ( S ) ) ;
+case StmtKind : : Guard :
+class Instrumenter : InstrumenterBase {
+}
+}
+
+ + DeferStmt * transformDeferStmt ( DeferStmt * DS ) {
++ if ( auto * FD = DS - > getTempDecl ( ) ) {
++ auto Implicit = FD - > isImplicit ( ) ;
++ FD - > setImplicit ( false ) ;
++ auto * D = transformDecl ( FD ) ;
++ D - > setImplicit ( Implicit ) ;
++ assert ( D = = FD ) ;
++ }
++ return DS ;
++ }
++
+/ / transform * ( ) return their input if it ' s unmodified ,
+/ / or a modified copy of their input otherwise .
+IfStmt * transformIfStmt ( IfStmt * IS ) { 
+
+",Add handling for DeferStmt in Instrumenter::transform<nl>,supported,exact_core,
+S123,php,"mmm a / Tests/RetryableHttpClientTest.php
+ppp b / Tests/RetryableHttpClientTest.php 
+@@ -225,4 +225,22 @@ class RetryableHttpClientTest extends TestCase
+$this->assertNotNull($delay);
+$this->assertSame((int) ($retryAfter * 1000), $delay);
+}
++
++ public function testRetryOnErrorAssertContent()
++ {
++ $client = new RetryableHttpClient(
++ new MockHttpClient([
++ new MockResponse('', ['http_code' => 500]),
++ new MockResponse('Test out content', ['http_code' => 200]),
++ ]),
++ new GenericRetryStrategy([500], 0),
++ 1
++ );
++
++ $response = $client->request('GET', 'http://example.com/foo-bar');
++
++ self::assertSame(200, $response->getStatusCode());
++ self::assertSame('Test out content', $response->getContent());
++ self::assertSame('Test out content', $response->getContent(), 'Content should be buffered');
++ }
+}
+",[HttpClient] Add test case for seeking into the content of RetryableHttpClient responses,neutral,near_miss,
+S124,php,"mmm a / Security.php
+ppp b / Security.php 
+@@ -13,6 +13,7 @@ namespace Symfony\Component\Security\Core;
+use Psr\Container\ContainerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
++use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+/**
+@@ -20,7 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
+*
+* @final
+*/
+-class Security
++class Security implements AuthorizationCheckerInterface
+{
+const ACCESS_DENIED_ERROR = '_security.403_error';
+const AUTHENTICATION_ERROR = '_security.last_error';
+","[Security] class Security implements AuthorizationCheckerInterface
+The class has the method of AuthorizationCheckerInterface already.",neutral,diff_insufficient,
+S127,php,"mmm a / pkg/enqueue/Symfony/Client/ConsumeCommand.php
+ppp b / pkg/enqueue/Symfony/Client/ConsumeCommand.php 
+@@ -5,7 +5,6 @@ namespace Enqueue\Symfony\Client;
+use Enqueue\Client\DriverInterface;
+use Enqueue\Consumption\ChainExtension;
+use Enqueue\Consumption\Extension\ExitStatusExtension;
+-use Enqueue\Consumption\Extension\LoggerExtension;
+use Enqueue\Consumption\ExtensionInterface;
+use Enqueue\Consumption\QueueConsumerInterface;
+use Enqueue\Symfony\Consumption\ChooseLoggerCommandTrait;
+@@ -18,7 +17,6 @@ use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+-use Symfony\Component\Console\Logger\ConsoleLogger;
+use Symfony\Component\Console\Output\OutputInterface;
+class ConsumeCommand extends Command
+@@ -154,7 +152,7 @@ class ConsumeCommand extends Command
+protected function getRuntimeExtensions(InputInterface $input, OutputInterface $output): ExtensionInterface
+{
+- $extensions = [new LoggerExtension(new ConsoleLogger($output))];
++ $extensions = [];
+$extensions = array_merge($extensions, $this->getLimitsExtensions($input, $output));
+$driver = $this->getDriver($input->getOption('client'));
+",Remove unused LoggerExtension from ConsumeCommand.,neutral,external_context,
+S128,cpp,"mmm a / dbms / src / Storages / MergeTree / registerStorageMergeTree . cpp
+ppp b / dbms / src / Storages / MergeTree / registerStorageMergeTree . cpp
+MergeTrees are different in two ways :
+- they may be replicated and non - replicated ;
+- they may do different actions on merge : nothing ; sign collapse ; sum ; apply aggregete functions .
+
+ - So we have 12 combinations :
+- MergeTree , CollapsingMergeTree , SummingMergeTree , AggregatingMergeTree , ReplacingMergeTree , GraphiteMergeTree
+- ReplicatedMergeTree , ReplicatedCollapsingMergeTree , ReplicatedSummingMergeTree , ReplicatedAggregatingMergeTree , ReplicatedReplacingMergeTree , ReplicatedGraphiteMergeTree
++ So we have 14 combinations :
++ MergeTree , CollapsingMergeTree , SummingMergeTree , AggregatingMergeTree , ReplacingMergeTree , GraphiteMergeTree , VersionedCollapsingMergeTree
++ ReplicatedMergeTree , ReplicatedCollapsingMergeTree , ReplicatedSummingMergeTree , ReplicatedAggregatingMergeTree , ReplicatedReplacingMergeTree , ReplicatedGraphiteMergeTree , ReplicatedVersionedCollapsingMergeTree
+
+ In most of cases , you need MergeTree or ReplicatedMergeTree .
+
+ For the Summing mode , the optional last parameter is a list of columns to sum wh
+If this parameter is omitted , the storage will sum all numeric columns except columns participating in the primary key .
+
+ For the Replacing mode , the optional last parameter is the name of a ' version '",Add VersionedCollapsingMergeTree and ReplicatedVersionedCollapsingMergeTree storage types.,neutral,diff_insufficient,
+S131,cpp,"mmm a / PowerEditor / src / ScitillaComponent / AutoCompletion . cpp
+ppp b / PowerEditor / src / ScitillaComponent / AutoCompletion . cpp
+void AutoCompletion : : getCloseTag ( char * closeTag , size_t closeTagSize , size_t car
+if ( tagHead [ 1 ] = = ' / ' ) / / "" < / toto > "" will be ignored
+return ;
+
+ + if ( tagHead [ 1 ] = = ' ? ' ) / / "" < ? "" ( Processing Instructions ) will be ignored
++ return ;
++
+if ( strncmp ( tagHead , "" < ! - - "" , 4 ) = = 0 ) / / Comments will be ignored
+return ;
+
+
+",Skip auto - complete of XML processing instructions,supported,exact_core,
+S135,go,"mmm a / internal/commands/image/list.go
+ppp b / internal/commands/image/list.go 
+@@ -2,12 +2,16 @@ package image
+import (
+""bytes""
++ ""encoding/json""
+""fmt""
+""io""
+""strings""
+""text/tabwriter""
+""time""
++ ""github.com/docker/cli/templates""
++ ""github.com/pkg/errors""
++
+""github.com/docker/app/internal/packager""
+""github.com/docker/app/internal/relocated""
+""github.com/docker/app/internal/store""
+@@ -22,11 +26,12 @@ import (
+type imageListOption struct {
+quiet bool
+digests bool
++ template string
+}
+type imageListColumn struct {
+header string
+- value func(p pkg) string
++ value func(desc imageDesc) string
+}
+func listCmd(dockerCli command.Cli) *cobra.Command {
+@@ -52,6 +57,8 @@ func listCmd(dockerCli command.Cli) *cobra.Command {
+flags := cmd.Flags()
+flags.BoolVarP(&options.quiet, ""quiet"", ""q"", false, ""Only show numeric IDs"")
+flags.BoolVarP(&options.digests, ""digests"", """", false, ""Show image digests"")
++ cmd.Flags().StringVarP(&options.template, ""format"", ""f"", """", ""Format the output using the given syntax or Go template"")
++ cmd.Flags().SetAnnotation(""format"", ""experimentalCLI"", []string{""true""}) //nolint:errcheck
+return cmd
+}
+@@ -94,10 +101,32 @@ func getPackages(bundleStore store.BundleStore, references []reference.Reference
+func printImages(dockerCli command.Cli, refs []pkg, options imageListOption) error {
+",Add JSON template support to the `docker app image list` command.,neutral,diff_insufficient,
+S138,cs,"mmm a / mcs / class / System / Test / System . Net . WebSockets / ClientWebSocketTest . cs
+ppp b / mcs / class / System / Test / System . Net . WebSockets / ClientWebSocketTest . cs
+namespace MonoTests . System . Net . WebSockets
+public class ClientWebSocketTest
+{
+const string EchoServerUrl = "" ws : / / corefx - net . cloudapp . net / WebSocket / EchoWebSocket . ashx "" ;
+- int Port = NetworkHelpers . FindFreePort ( ) ;
++
++ ClientWebSocket socket ;
++ MethodInfo headerSetMethod ;
++ int Port ;
++
++ [ SetUp ]
++ public void Setup ( )
++ {
++ socket = new ClientWebSocket ( ) ;
++ Port = NetworkHelpers . FindFreePort ( ) ;
++ }
++
+HttpListener _listener ;
+HttpListener listener {
+get {
+if ( _listener ! = null )
+return _listener ;
++
+var tmp = new HttpListener ( ) ;
+tmp . Prefixes . Add ( "" http : / / localhost : "" + Port + "" / "" ) ;
+tmp . Start ( ) ;
+return _listener = tmp ;
+}
+}
+- ClientWebSocket _socket ;
+- ClientWebSocket socket { get { return _socket ? ? ( _socket = new ClientWebSocket ( ) ) ; } }
+- MethodInfo headerSetMethod ;
+
+ [ TearDown ]
+public void Teardown ( )
+public void Teardown ( )
+_listener . Stop ( ) ;
+_listener = null ;
+}
+- if ( _socket ! = null ) {
+- if ( _socket . State = = WebSocketState . Open )
+- _socket . CloseAsync ( WebSocketCloseStatus . NormalClosure , str",[ System ] Update ClientWebSocket test to use Setup,supported,exact_core,
+S140,js,"mmm a / test / MySQLAdapter . test . js
+ppp b / test / MySQLAdapter . test . js
+
+ / / Test MySQLAdapter
+- var mysql = require ( ' . / adapters / MySQLAdapter . js ' ) ;
+- require ( ' . / crud . test . js ' ) ( mysql ) ;
+\ No newline at end of file
++ require ( ' . / crud . test . js ' ) ( require ( ' . / adapters / MySQLAdapter . js ' ) ) ;
+\ No newline at end of file 
+
+","""Update MySQLAdapter test cases""",neutral,too_abstract,
+S142,cpp,"mmm a / lib / IRGen / IRGenDebugInfo . cpp
+ppp b / lib / IRGen / IRGenDebugInfo . cpp
+
+ # include "" llvm / Config / config . h ""
+# include "" llvm / IR / DIBuilder . h ""
+# include "" llvm / IR / DebugInfo . h ""
++ # include "" llvm / IR / IntrinsicInst . h ""
+# include "" llvm / IR / Module . h ""
+# include "" llvm / Support / CommandLine . h ""
+# include "" llvm / Support / Debug . h ""
+void IRGenDebugInfoImpl : : emitDbgIntrinsic (
+auto * BB = Builder . GetInsertBlock ( ) ;
+
+ / / An alloca may only be described by exactly one dbg . declare .
+- if ( isa < llvm : : AllocaInst > ( Storage ) & & llvm : : FindAllocaDbgDeclare ( Storage ) )
++ if ( isa < llvm : : AllocaInst > ( Storage ) & & ! llvm : : FindDbgAddrUses ( Storage ) . empty ( ) )
+return ;
+
+ / / A dbg . declare is only meaningful if there is a single alloca for 
+
+",master - next : Update IRGenDebugInfo . cpp for LLVM r313825,neutral,external_context,
+S145,php,"mmm a / modules/cms/src/admin/importers/CmslayoutImporter.php
+ppp b / modules/cms/src/admin/importers/CmslayoutImporter.php 
+@@ -88,7 +88,8 @@ class CmslayoutImporter extends Importer
+if ($layoutItem) {
+$match = $this->comparePlaceholders($_placeholders, json_decode($layoutItem->json_config, true));
+- if ($match) {
++ $matchRevert = $this->comparePlaceholders(json_decode($layoutItem->json_config, true), $_placeholders);
++ if ($match && $matchRevert) {
+$layoutItem->updateAttributes([
+'name' => $readableFileName,
+'view_file' => $fileBaseName,
+","cms layout import ensure revert way in order to support new placeholder
+layouts.",neutral,external_context,
+S154,php,"mmm a / pkg/enqueue/Symfony/Client/ConsumeCommand.php
+ppp b / pkg/enqueue/Symfony/Client/ConsumeCommand.php 
+@@ -5,7 +5,6 @@ namespace Enqueue\Symfony\Client;
+use Enqueue\Client\DriverInterface;
+use Enqueue\Consumption\ChainExtension;
+use Enqueue\Consumption\Extension\ExitStatusExtension;
+-use Enqueue\Consumption\Extension\LoggerExtension;
+use Enqueue\Consumption\ExtensionInterface;
+use Enqueue\Consumption\QueueConsumerInterface;
+use Enqueue\Symfony\Consumption\ChooseLoggerCommandTrait;
+@@ -18,7 +17,6 @@ use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+-use Symfony\Component\Console\Logger\ConsoleLogger;
+use Symfony\Component\Console\Output\OutputInterface;
+class ConsumeCommand extends Command
+@@ -154,7 +152,7 @@ class ConsumeCommand extends Command
+protected function getRuntimeExtensions(InputInterface $input, OutputInterface $output): ExtensionInterface
+{
+- $extensions = [new LoggerExtension(new ConsoleLogger($output))];
++ $extensions = [];
+$extensions = array_merge($extensions, $this->getLimitsExtensions($input, $output));
+$driver = $this->getDriver($input->getOption('client'));
+",Remove unused imports and extensions in ConsumeCommand.php,neutral,external_context,
+S155,php,"mmm a / src/Exception/OAuthServerException.php
+ppp b / src/Exception/OAuthServerException.php 
+@@ -105,7 +105,10 @@ class OAuthServerException extends \Exception
+public static function invalidScope($scope, $redirectUri = null)
+{
+$errorMessage = 'The requested scope is invalid, unknown, or malformed';
+- $hint = sprintf('Check the `%s` scope', $scope);
++ $hint = sprintf(
++ 'Check the `%s` scope',
++ htmlspecialchars($scope, ENT_QUOTES, 'UTF-8', false)
++ );
+return new static($errorMessage, 5, 'invalid_scope', 400, $hint, $redirectUri);
+}
+",Escape scope parameter to reduce pontential XSS vector,neutral,external_context,
+S159,php,"mmm a / src/ProxyManager/ProxyGenerator/Util/PublicScopeSimulator.php
+ppp b / src/ProxyManager/ProxyGenerator/Util/PublicScopeSimulator.php 
+@@ -37,9 +37,9 @@ class PublicScopeSimulator
+* the operation. Return directly if none provided
+* @param string|null $interfaceName name of the proxified interface if any
+*
+- * @psalm-param $operationType self::OPERATION_*
+- *
+* @throws InvalidArgumentException
++ *
++ * @psalm-param $operationType self::OPERATION_*
+*/
+public static function getPublicAccessSimulationCode(
+string $operationType,
+@@ -61,8 +61,7 @@ class PublicScopeSimulator
+? 'new \\ReflectionClass(get_parent_class($this))'
+: 'new \\ReflectionClass(' . var_export($originalClass->getName(), true) . ')';
+- $returnPropertyName = $returnPropertyName
+- ?? ($operationType === self::OPERATION_UNSET ? 'unset' : $returnPropertyName);
++ $returnPropertyName ??= ($operationType === self::OPERATION_UNSET ? 'unset' : $returnPropertyName);
+return '$realInstanceReflection = ' . $originalClassReflection . ';' . ""\n\n""
+. 'if (! $realInstanceReflection->hasProperty($' . $nameParameter . ')) {' . ""\n""
+","""Refactored getPublicAccessSimulationCode method""",neutral,too_abstract,
+S160,py,"mmm a / youtube_dl / extractor / wimp . py
+ppp b / youtube_dl / extractor / wimp . py
+
+ from __future__ import unicode_literals
+
+ - from . common import InfoExtractor
+from . youtube import YoutubeIE
++ from . jwplatform import JWPlatformBaseIE
+
+
+- class WimpIE ( InfoExtractor ) :
++ class WimpIE ( JWPlatformBaseIE ) :
+_VALID_URL = r ' https ? : / / ( ? : www \ . ) ? wimp \ . com / ( ? P < id > [ ^ / ] + ) '
+_TESTS = [ {
+- ' url ' : ' http : / / www . wimp . com / maruexhausted / ' ,
++ ' url ' : ' http : / / www . wimp . com / maru - is - exhausted / ' ,
+' md5 ' : ' ee21217ffd66d058e8b16be340b74883 ' ,
+' info_dict ' : {
+- ' id ' : ' maruexhausted ' ,
++ ' id ' : ' maru - is - exhausted ' ,
+' ext ' : ' mp4 ' ,
+' title ' : ' Maru is exhausted . ' ,
+' description ' : ' md5 : 57e099e857c0a4ea312542b684a869b8 ' ,
+}
+} , {
+' url ' : ' http : / / www . wimp . com / clowncar / ' ,
+- ' md5 ' : ' 4e2986c793694b55b37cf92521d12bb4 ' ,
++ ' md5 ' : ' 5c31ad862a90dc5b1f023956faec13fe ' ,
+' info_dict ' : {
+- ' id ' : ' clowncar ' ,
++ ' id ' : ' cG4CEr2aiSg ' ,
+' ext ' : ' webm ' ,
+- ' title ' : ' It \ ' s like a clown car . ' ,
+- ' description ' : ' md5 : 0e56db1370a6e49c5c1d19124c0d2fb2 ' ,
++ ' title ' : ' Basset hound clown car . . . incredible ! ' ,
++ ' description ' : ' 5 of my Bassets crawled in this dog loo ! www . bellingha",[ wimp ] Fix extraction and update _TESTS,neutral,external_context,
+S161,cpp,"mmm a / lib / Driver / Tools . cpp
+ppp b / lib / Driver / Tools . cpp
+static void addCommonFrontendArgs ( const ToolChain & TC ,
+/ / Pass through the values passed to - Xfrontend .
+inputArgs . AddAllArgValues ( arguments , options : : OPT_Xfrontend ) ;
+
+ - / / Pass through any - Xllvm flags .
++ / / Pass through any subsystem flags .
+inputArgs . AddAllArgs ( arguments , options : : OPT_Xllvm ) ;
++ inputArgs . AddAllArgs ( arguments , options : : OPT_Xcc ) ;
+
+ const std : : string & moduleDocOutputPath =
+output - > getAdditionalOutputForType ( types : : TY_SwiftModuleDocFile ) ; 
+
+",[ driver ] Pass - Xcc options down to frontend tools .,supported,exact_core,
+S164,go,"mmm a / types/metadata/metadata.go
+ppp b / types/metadata/metadata.go 
+@@ -2,6 +2,8 @@ package metadata
+import (
+""strings""
++
++ ""github.com/deislabs/cnab-go/bundle""
+)
+// Maintainer represents one of the apps's maintainers
+@@ -38,3 +40,19 @@ type AppMetadata struct {
+Description string `json:""description,omitempty""`
+Maintainers Maintainers `json:""maintainers,omitempty""`
+}
++
++// Metadata extracts the docker-app metadata from the bundle
++func FromBundle(bndl *bundle.Bundle) AppMetadata {
++ meta := AppMetadata{
++ Name: bndl.Name,
++ Version: bndl.Version,
++ Description: bndl.Description,
++ }
++ for _, m := range bndl.Maintainers {
++ meta.Maintainers = append(meta.Maintainers, Maintainer{
++ Name: m.Name,
++ Email: m.Email,
++ })
++ }
++ return meta
++}
+",metadata: Add helper to extract docker-app metadata from a bundle.,supported,exact_core,
+S166,js,"mmm a / tasks / build . js
+ppp b / tasks / build . js
+var
+
+ / / config
+config = require ( ' . / config / user ' ) ,
+- runSequence = require ( ' run - sequence ' ) ,
+install = require ( ' . / config / project / install ' )
+;
+
+ module . exports = function ( callback ) {
+return ;
+}
+
+ - var tasks = [ ] ;
+-
+/ / check for right - to - left ( RTL ) language
+if ( config . rtl = = ' both ' ) {
+- tasks . push ( ' build - rtl ' ) ;
++ gulp . start ( ' build - rtl ' ) ;
+}
+if ( config . rtl = = = true | | config . rtl = = = ' Yes ' ) {
+gulp . start ( ' build - rtl ' ) ;
+return ;
+}
+
+ - tasks . push ( ' build - javascript ' ) ;
+- tasks . push ( ' build - css ' ) ;
+- tasks . push ( ' build - assets ' ) ;
++ gulp . start ( ' build - javascript ' ) ;
++ gulp . start ( ' build - css ' ) ;
++ gulp . start ( ' build - assets ' ) ;
++
+
+ - runSequence ( tasks , callback ) ;
+} ; 
+
+","Revert "" Fix callback return from build task """,neutral,external_context,
+S172,go,"mmm a / cluster/network.go
+ppp b / cluster/network.go 
+@@ -534,9 +534,10 @@ func checkPlanePortsFromHost(ctx context.Context, host *hosts.Host, portList []s
+if tcp {
+cmd = append(cmd, ""for host in $HOSTS; do for port in $PORTS ; do echo \""Checking host ${host} on port ${port}\"" >&1 & nc -w5 -z $host $port > /dev/null || echo \""${host}:${port}\"" >&2 & done; wait; done"")
+} else {
+- // UDP port scans using the -uz combination of flags will always report success irrespective of the target machine's state,
+- // so instead we use -uzv to log verbose output if the checking port is not open or unreachable, and it will print nothing if it succeeds
+- cmd = append(cmd, ""for host in $HOSTS; do for port in $PORTS ; do echo \""Checking host ${host} on port ${port}\"" >&1 & nc -w5 -uzv $host $port > /dev/null & done; wait; done"")
++ // TODO: add proper UDP port checks, and because UDP is not reliable so it has no acknowledgment, retransmission, or timeout.
++ // Also the k8s layer 3 network like flannel will filtering the host port like 8472 once is installed, so commands like `nc -w5 -uzv $host $port` will always return the same message regardless of the udp port is opened or not.
++ // More details on: https://github.com/rancher/rke/issues/1102
++ return nil
+}
+for _, host := range planeHosts {
+",Add TODO for UDP port checks and note on k8s network filtering.,neutral,missing_key_detail,
+S173,php,"mmm a / Response/CurlResponse.php
+ppp b / Response/CurlResponse.php 
+@@ -167,6 +167,7 @@ final class CurlResponse implements ResponseInterface
+if (!\in_array(curl_getinfo($this->handle, CURLINFO_PRIVATE), ['headers', 'content'], true)) {
+rewind($this->debugBuffer);
+$info['debug'] = stream_get_contents($this->debugBuffer);
++ curl_setopt($this->handle, CURLOPT_VERBOSE, false);
+fclose($this->debugBuffer);
+$this->debugBuffer = null;
+$this->finalInfo = $info;
+","""Added curl_setopt to CurlResponse.php""",neutral,too_abstract,
+S175,py,"mmm a / corporate / tests / test_stripe . py
+ppp b / corporate / tests / test_stripe . py
+class StripeTest ( ZulipTestCase ) :
+def setUp ( self , mock3 : Mock , mock2 : Mock , mock1 : Mock ) - > None :
+call_command ( "" setup_stripe "" )
+
+ - self . token = ' token '
+self . quantity = 8
+self . signed_seat_count , self . salt = sign_string ( str ( self . quantity ) )
+
+ def get_salt_from_response ( self , response : HttpResponse ) - > Optional [ str ] :
+match = re . search ( r ' name = \ "" salt \ "" value = \ "" ( \ w + ) \ "" ' , response . content . decode ( "" utf - 8 "" ) )
+return match . group ( 1 ) if match else None
+
+ + def upgrade ( self , invoice : bool = False , talk_to_stripe : bool = True ,
++ realm : Optional [ Realm ] = None , * * kwargs : Any ) - > HttpResponse :
++ host_args = { }
++ if realm is not None :
++ host_args [ ' HTTP_HOST ' ] = realm . host
++ response = self . client_get ( "" / upgrade / "" , * * host_args )
++ params = {
++ ' signed_seat_count ' : self . get_signed_seat_count_from_response ( response ) ,
++ ' salt ' : self . get_salt_from_response ( response ) ,
++ ' plan ' : Plan . CLOUD_ANNUAL } # type : Dict [ str , Any ]
++ if invoice : # send_invoice
++ params . update ( {
++ ' invoiced_seat_count ' : 123 ,
++ ' billing_modality ' : ' send_invoice ' } )
++ else : # charge_automatically
++ stripe_token = None
++ if not talk_to_st",billing : Use common pathway for upgrading in tests .,neutral,diff_insufficient,
+S177,py,"mmm a / lib / ansible / release . py
+ppp b / lib / ansible / release . py
+
+ from __future__ import ( absolute_import , division , print_function )
+__metaclass__ = type
+
+ - __version__ = ' 2 . 6 . 0a1 '
++ __version__ = ' 2 . 6 . 0dev0 '
+__author__ = ' Ansible , Inc . '
+__codename__ = ' Heartbreaker ' 
+
+",Update Ansible release version to 2 . 6 . 0dev0 .,supported,exact_core,
+S180,cs,"mmm a / Duplicati / Library / AutoUpdater / UpdaterManager . cs
+ppp b / Duplicati / Library / AutoUpdater / UpdaterManager . cs
+public static bool DownloadAndUnpackUpdate ( UpdateInfo version , Action < double > pr
+if ( INSTALLDIR = = null )
+return false ;
+
+ +
++ var updates = version . RemoteURLS . ToList ( ) ;
++
++ / / If alternate update URLs are specified ,
++ / / we look for packages there as well
++ if ( AutoUpdateSettings . UsesAlternateURLs )
++ {
++ var packagepath = new Library . Utility . Uri ( updates [ 0 ] ) . Path ;
++ var packagename = packagepath . Split ( ' / ' ) . Last ( ) ;
++
++ foreach ( var alt_url in AutoUpdateSettings . URLs . Reverse ( ) )
++ {
++ var alt_uri = new Library . Utility . Uri ( alt_url ) ;
++ var path_components = alt_uri . Path . Split ( ' / ' ) ;
++ var path = string . Join ( "" / "" , path_components . Take ( path_components . Count ( ) - 1 ) . Union ( new string [ ] { packagename } ) ) ;
++
++ var new_path = alt_uri . SetPath ( path ) ;
++ updates . Insert ( 0 , new_path . ToString ( ) ) ;
++ }
++ }
++
+using ( var tempfile = new Library . Utility . TempFile ( ) )
+{
+- foreach ( var url in version . RemoteURLS )
++ foreach ( var url in updates )
+{
+try
+{ 
+
+",Added check to allow storing update packages on a local server for enterprise - like setups .,neutral,external_context,
+S181,go,"mmm a / internal/commands/image/rm.go
+ppp b / internal/commands/image/rm.go 
+@@ -14,8 +14,9 @@ import (
+func rmCmd() *cobra.Command {
+return &cobra.Command{
+- Use: ""rm [APP_IMAGE] [APP_IMAGE...]"",
+Short: ""Remove an application image"",
++ Use: ""rm [APP_IMAGE] [APP_IMAGE...]"",
++ Aliases: []string{""remove""},
+Args: cli.RequiresMinArgs(1),
+Example: `$ docker app image rm myapp
+$ docker app image rm myapp:1.0.0
+","""Update rmCmd: Add aliases and args""",neutral,near_miss,
+S183,java,"mmm a / src / main / java / com / google / devtools / build / lib / skyframe / SkyframeExecutor . java
+ppp b / src / main / java / com / google / devtools / build / lib / skyframe / SkyframeExecutor . java
+protected PerBuildSyscallCache newPerBuildSyscallCache ( int concurrencyLevel ) {
+* expensive , and is on the critical path of null builds .
+* /
+protected final PerBuildSyscallCache getPerBuildSyscallCache ( int concurrencyLevel ) {
+- if ( lastConcurrencyLevel = = concurrencyLevel ) {
++ if ( perBuildSyscallCache ! = null & & lastConcurrencyLevel = = concurrencyLevel ) {
+perBuildSyscallCache . clear ( ) ;
+return perBuildSyscallCache ;
+}
+public abstract void invalidateFilesUnderPathForTesting ( EventHandler eventHandle
+for ( AspectValueKey aspectKey : aspectKeys ) {
+keys . add ( aspectKey . getSkyKey ( ) ) ;
+}
+- return buildDriver . evaluate ( keys , keepGoing , numThreads , eventHandler ) ;
++ EvaluationResult < ActionLookupValue > result =
++ buildDriver . evaluate ( keys , keepGoing , numThreads , eventHandler ) ;
++ / / Get rid of any memory retained by the cache - - all loading is done .
++ perBuildSyscallCache = null ;
++ return result ;
+}
+
+ / * * 
+
+",Null out perBuildSyscallCache after analysis is finished to save memory during execution .,neutral,external_context,
+S185,php,"mmm a / None
+ppp b / Resources/bin/translation-status.php 
++<?php
++
++/*
++ * This file is part of the Symfony package.
++ *
++ * (c) Fabien Potencier <fabien@symfony.com>
++ *
++ * For the full copyright and license information, please view the LICENSE
++ * file that was distributed with this source code.
++ */
++
++$usageInstructions = <<<END
++
++ Usage instructions
++ -------------------------------------------------------------------------------
++
++ $ cd symfony-code-root-directory/
++
++ # show the translation status of all locales
++ $ php translation-status.php
++
++ # show the translation status of all locales and all their missing translations
++ $ php translation-status.php -v
++
++ # show the status of a single locale
++ $ php translation-status.php fr
++
++ # show the status of a single locale and all its missing translations
++ $ php translation-status.php fr -v
++
++END;
++
++$config = [
++ // if TRUE, the full list of missing translations is displayed
++ 'verbose_output' => false,
++ // NULL = analyze all locales
++ 'locale_to_analyze' => null,
++ // the reference files all the other translations are compared to
++ 'original_files' => [
++ 'src/Symfony/Component/Form/Resources/translations/validators.en.xlf',
++ 'src/Symfony/Component/Security/Core/Resources/translations/security.en.xlf', <nl","""Added translation status script to check translation status of all locales""",supported,exact_core,
+S186,cpp,"mmm a / xbmc / video / dialogs / GUIDialogVideoInfo . cpp
+ppp b / xbmc / video / dialogs / GUIDialogVideoInfo . cpp
+void CGUIDialogVideoInfo : : OnGetArt ( )
+/ / which is probably the IMDb thumb . These could be wrong , so allow the user
+/ / to delete the incorrect thumb
+CFileItemPtr item ( new CFileItem ( "" thumb : / / None "" , false ) ) ;
+- item - > SetIconImage ( "" DefaultVideo . png "" ) ;
++ item - > SetIconImage ( "" DefaultPicture . png "" ) ;
+item - > SetLabel ( g_localizeStrings . Get ( 13515 ) ) ;
+items . Add ( item ) ;
+}
+void CGUIDialogVideoInfo : : OnGetFanart ( )
+else
+{
+CFileItemPtr itemNone ( new CFileItem ( "" fanart : / / None "" , false ) ) ;
+- itemNone - > SetIconImage ( "" DefaultVideo . png "" ) ;
++ itemNone - > SetIconImage ( "" DefaultPicture . png "" ) ;
+itemNone - > SetLabel ( g_localizeStrings . Get ( 20439 ) ) ;
+items . Add ( itemNone ) ;
+}
+void CGUIDialogVideoInfo : : ShowFor ( const CFileItem & item )
+ADDON : : ScraperPtr info ;
+window - > OnItemInfo ( item , info ) ;
+}
+- }
+\ No newline at end of file
++ } 
+
+","""Implemented thumbnail and fanart deletion in video info dialog""",neutral,near_miss,
+S188,php,"mmm a / modules/admin/src/views/ngrest/crud.php
+ppp b / modules/admin/src/views/ngrest/crud.php 
+@@ -11,8 +11,10 @@ $this->beginBody();
+?>
+<?php $this->registerAngularControllerScript(); ?>
+<div ng-controller=""<?= $config->hash; ?>"" ng-init=""init()"" class=""crud"">
++
+<!-- This fake ui-view is used to render the detail item, which actuals uses the parent scope in the ui router controller. -->
+- <div style=""visibility:hidden;"" ui-view></div>
++ <div style=""display: none;"" ui-view></div>
++
+<?php if (!$relationCall): ?>
+<?php if (!$isInline): ?>
+<div class=""crud-header"">
+",Changed visibility: hidden to display: none on fake crud ui-view,supported,exact_core,
+S191,py,"mmm a / Lib / smtplib . py
+ppp b / Lib / smtplib . py
+def __init__ ( self , recipients ) :
+self . args = ( recipients , )
+
+
+-
+class SMTPDataError ( SMTPResponseException ) :
+"" "" "" The SMTP server didn ' t accept the data . "" "" ""
+
+ class SMTPConnectError ( SMTPResponseException ) :
+class SMTPHeloError ( SMTPResponseException ) :
+"" "" "" The server refused our HELO reply . "" "" ""
+
+ +
+def quoteaddr ( addr ) :
+"" "" "" Quote a subset of the email addresses defined by RFC 821 .
+
+ def quotedata ( data ) :
+return re . sub ( r ' ( ? m ) ^ \ . ' , ' . . ' ,
+re . sub ( r ' ( ? : \ r \ n | \ n | \ r ( ? ! \ n ) ) ' , CRLF , data ) )
+
+ + def _get_fqdn_hostname ( name ) :
++ name = string . strip ( name )
++ if len ( name ) = = 0 :
++ name = socket . gethostname ( )
++ try :
++ hostname , aliases , ipaddrs = socket . gethostbyaddr ( name )
++ except socket . error :
++ pass
++ else :
++ aliases . insert ( 0 , hostname )
++ for name in aliases :
++ if ' . ' in name :
++ break
++ else :
++ name = hostname
++ return name
++
++
+class SMTP :
+"" "" "" This class manages a connection to an SMTP or ESMTP server .
+SMTP Objects :
+def helo ( self , name = ' ' ) :
+Hostname to send for this command defaults to the FQDN of the local
+host .
+"" "" ""
+- name = string . strip ( name )
+- if len ( name ) = = 0 ","""Refactored SMTP class and added helper functions""",neutral,too_abstract,
+S192,go,"mmm a / pkg/cmd/proxy.go
+ppp b / pkg/cmd/proxy.go 
+@@ -26,6 +26,7 @@ import (
+""github.com/spf13/cobra""
+""github.com/spf13/pflag""
++ ""k8c.io/kubeone/pkg/ssh""
+""k8c.io/kubeone/pkg/state""
+)
+@@ -70,6 +71,13 @@ func setupProxyTunnel(opts *proxyOpts) error {
+return err
+}
++ // Check if we can authenticate via ssh
++ tunn, err := s.Connector.Tunnel(s.Cluster.RandomHost())
++ if err != nil {
++ return err
++ }
++ defer tunn.Close()
++
+server := &http.Server{
+Addr: opts.ListenAddr,
+Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+@@ -78,7 +86,7 @@ func setupProxyTunnel(opts *proxyOpts) error {
+return
+}
+- if err := handleTunneling(w, r, s); err != nil {
++ if terr := handleTunneling(w, r, s, tunn); terr != nil {
+code := http.StatusInternalServerError
+if err1, ok := err.(*httpError); ok {
+code = err1.code
+@@ -90,6 +98,7 @@ func setupProxyTunnel(opts *proxyOpts) error {
+fmt.Println(""SSH tunnel started, please open another terminal and setup environment"")
+fmt.Printf(""export HTTPS_PROXY=http://%s\n"", opts.ListenAddr)
++
+return server.ListenAndServe()
+}
+@@ -102,12 +111,7 @@ func (e *httpError) Error() string {
+return fmt.Sprintf(""error: %s, code: %d"", e.err, e.code)
+}
+-func handleTunneling(w http.ResponseWriter, r *http.Request, s *state.State) error {
+- tunn, err := s.Connector.Tunnel(s.C","use a single shared ssh connection for proxying individual tcp connections
+this also has the advantage of failing early when ssh authentication fails
+don't shadow outer err when tunneling a connection
+incorporate reviewer suggestion",neutral,external_context,
+S193,cpp,"mmm a / dbms / src / Storages / StorageMergeTree . cpp
+ppp b / dbms / src / Storages / StorageMergeTree . cpp
+void StorageMergeTree : : alter (
+if ( primary_key_is_modified & & data . merging_params . mode = = MergeTreeData : : MergingParams : : Unsorted )
+throw Exception ( "" UnsortedMergeTree cannot have primary key "" , ErrorCodes : : BAD_ARGUMENTS ) ;
+
+ + if ( primary_key_is_modified & & supportsSampling ( ) )
++ throw Exception ( "" MODIFY PRIMARY KEY only supported for tables without sampling key "" , ErrorCodes : : BAD_ARGUMENTS ) ;
++
+MergeTreeData : : DataParts parts = data . getAllDataParts ( ) ;
+for ( const MergeTreeData : : DataPartPtr & part : parts )
+if ( auto transaction = data . alterDataPart ( part , columns_for_parts , new_primary_key_ast , false ) ) 
+
+",Fix unsupported primary key for unsorted MergeTree.,neutral,near_miss,

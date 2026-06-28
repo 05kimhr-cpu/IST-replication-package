@@ -1,0 +1,18 @@
+# Iter 18 - RQ1 CSV audit
+
+These values are recomputed directly from the released RQ1 result CSVs.
+
+| metric | family | n | mean abs delta | exact zero % | abs(delta) < 0.01 % | syn-pref % |
+|--------|--------|---:|-------------:|-------------:|-----------------:|-----------:|
+| bleu | verb | 1630 | 0.000000 | 100.0 | 100.0 | 0.0 |
+| bleu | noun | 1277 | 0.000000 | 100.0 | 100.0 | 0.0 |
+| rougeL | verb | 1630 | 0.000000 | 100.0 | 100.0 | 0.0 |
+| rougeL | noun | 1277 | 0.000000 | 100.0 | 100.0 | 0.0 |
+| chrf | verb | 1630 | 0.010777 | 37.2 | 77.8 | 13.7 |
+| chrf | noun | 1277 | 0.011333 | 0.2 | 68.4 | 90.2 |
+| meteor | verb | 1630 | 0.014160 | 84.2 | 84.5 | 15.8 |
+| meteor | noun | 1277 | 0.000189 | 98.7 | 99.7 | 0.7 |
+| bertscore | verb | 1630 | 0.005096 | 0.0 | 83.3 | 50.6 |
+| bertscore | noun | 1277 | 0.006684 | 0.0 | 79.9 | 73.8 |
+| nli_signed | verb | 1630 | 1.875918 | 0.0 | 0.1 | 99.9 |
+| nli_signed | noun | 1277 | 0.811857 | 0.0 | 2.3 | 93.9 |
