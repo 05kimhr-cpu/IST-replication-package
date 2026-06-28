@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Analyze the completed diff-description accuracy human audit.
 
-Reads out/rater.csv (filled) + out/key.csv (+ optional out/retest.csv filled)
+Reads out/human_final_consolidated.csv when present, otherwise out/rater.csv,
+plus out/key.csv (+ optional out/retest.csv filled)
 and computes:
   - primary human supported-rate for gold vs generated messages
   - supported/neutral/contradicted label distribution
@@ -67,6 +68,21 @@ def load_rater(path, id_col="sample_id"):
                 "reason": reason,
                 "notes": row.get("rater_notes", ""),
                 "orig": row.get("orig_sample_id", ""),
+            }
+    return out
+
+
+def load_final_consolidated(path):
+    out = {}
+    with open(path, newline="") as f:
+        for row in csv.DictReader(f):
+            lab = (row.get("final_label") or "").strip().lower()
+            reason = (row.get("final_reason") or "").strip().lower()
+            out[row["sample_id"]] = {
+                "label": lab,
+                "reason": reason,
+                "notes": row.get("resolved_by", ""),
+                "orig": "",
             }
     return out
 
@@ -150,11 +166,17 @@ def main():
     args = ap.parse_args()
     o = args.out
 
-    rater = load_rater(os.path.join(o, "rater.csv"))
+    final_path = os.path.join(o, "human_final_consolidated.csv")
+    if os.path.exists(final_path):
+        rater = load_final_consolidated(final_path)
+        rating_source = "out/human_final_consolidated.csv"
+    else:
+        rater = load_rater(os.path.join(o, "rater.csv"))
+        rating_source = "out/rater.csv"
     key = load_key(os.path.join(o, "key.csv"))
     rated, pending = validate_ratings(rater)
     if not rated:
-        sys.exit("No rows rated yet. Fill rater_label and rater_reason in out/rater.csv, then re-run.")
+        sys.exit(f"No rows rated yet. Fill labels in {rating_source}, then re-run.")
 
     weight = load_weights(o)
     rows = []
@@ -231,8 +253,12 @@ def main():
     L.append("# Diff-description accuracy audit - analysis\n")
     L.append(f"- Rated: **{n}** / {len(rater)} main items"
              + (f" ({len(pending)} pending)" if pending else "") + "\n")
-    L.append("- Rater: single independent blind human. Treat as a calibration audit, "
-             "not a multi-rater gold standard.\n")
+    L.append(f"- Rating source: `{rating_source}`.\n")
+    if rating_source.endswith("human_final_consolidated.csv"):
+        L.append("- Human labels: final consolidated labels after adjudication.\n")
+    else:
+        L.append("- Rater: single independent blind human. Treat as a calibration audit, "
+                 "not a multi-rater gold standard.\n")
     L.append("- Human input: the shown diff is capped to the same 1,500-character premise "
              "used by the BART-MNLI diff diagnostic.\n")
 
