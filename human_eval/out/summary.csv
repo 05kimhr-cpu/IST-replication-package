@@ -6,6 +6,14 @@ human_supported_gold_weighted,0.4454
 human_supported_gen_weighted,0.276
 nli_pass_gold_weighted,0.1881
 nli_pass_gen_weighted,0.3638
+label_source,adjudicated_consensus
+inter_rater_agreement_3way,0.8625
+inter_rater_agreement_binary,0.9
+inter_rater_kappa_3way,0.717
+inter_rater_kappa_binary,0.7838
+krippendorff_alpha_3way,0.7185
+pabak_3way,0.7938
+pabak_binary,0.8
 agreement_binary,0.625
 kappa_binary,0.25
 kappa_3way,0.2694
